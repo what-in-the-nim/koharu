@@ -73,6 +73,7 @@
     "reset": "초기화"
   },
   "errors": {
+    "actionFailed": "작업을 완료할 수 없습니다",
     "fatalTitle": "Koharu를 계속 실행할 수 없습니다",
     "tryAgain": "다시 시도"
   },

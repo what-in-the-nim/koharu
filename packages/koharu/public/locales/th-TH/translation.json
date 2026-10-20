@@ -73,6 +73,7 @@
     "reset": "รีเซ็ต"
   },
   "errors": {
+    "actionFailed": "ไม่สามารถดำเนินการนี้ได้",
     "fatalTitle": "Koharu ไม่สามารถทำงานต่อได้",
     "tryAgain": "ลองอีกครั้ง"
   },

@@ -17,6 +17,8 @@ import type {
 } from '@koharu/bridge/protocol'
 import { toast } from '@koharu/ui/components/toast'
 
+import i18n from './i18n'
+
 export type CanvasTool = 'select' | 'text' | 'draw' | 'eraser' | 'color_picker' | 'remove' | 'pan'
 export const MIN_BRUSH_DIAMETER = 1
 export function maxBrushDiameter(size: PageSize): number {
@@ -176,7 +178,7 @@ export function receiveResources(resources: ModelResources): void {
 }
 
 export function receiveError(message: string): void {
-  toast.add({ type: 'error', title: 'Could not complete that action', description: message })
+  toast.add({ type: 'error', title: i18n.t('errors.actionFailed'), description: message })
 }
 
 function canvasSnapshot(canvas: CanvasState) {
