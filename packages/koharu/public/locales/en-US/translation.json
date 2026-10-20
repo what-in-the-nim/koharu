@@ -257,6 +257,8 @@
     "github": "GitHub",
     "help": "Help",
     "import": "Import Pages",
+    "nextPage": "Next Page",
+    "previousPage": "Previous Page",
     "process": "Process",
     "processLayers": "Process Selected Layers",
     "processPages": "Process Selected Pages",

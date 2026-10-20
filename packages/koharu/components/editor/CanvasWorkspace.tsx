@@ -583,6 +583,7 @@ export function CanvasWorkspace() {
         <div
           ref={surface}
           tabIndex={0}
+          data-canvas-surface
           aria-label={t('canvas.surface')}
           aria-busy={page ? canvasState.status !== 'ready' : undefined}
           className='relative min-h-0 min-w-0 flex-1 touch-none overflow-hidden bg-[var(--surface-canvas)] outline-none'

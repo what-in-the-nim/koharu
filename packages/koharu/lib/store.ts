@@ -55,6 +55,7 @@ interface KoharuStore {
   canvasSize: [number, number]
   // Requests are fresh objects so that repeating the same action still notifies subscribers.
   canvasViewRequest: { action: CanvasViewAction } | null
+  pageStepRequest: { step: 1 | -1 } | null
   layerFrames: Record<EntityId, Frame>
   selectedLayers: EntityId[]
   selectedPages: EntityId[]
@@ -73,6 +74,7 @@ interface KoharuStore {
   setBrush: (brush: CanvasBrush) => void
   setShortcut: (action: ShortcutAction, key: string) => void
   requestCanvasView: (action: CanvasViewAction) => void
+  requestPageStep: (step: 1 | -1) => void
   dismissJob: (id: string) => void
   dismissDownload: (id: number) => void
 }
@@ -101,6 +103,7 @@ export const useKoharuStore = create<KoharuStore>()((set) => ({
   canvasGeneration: 0,
   canvasSize: [0, 0],
   canvasViewRequest: null,
+  pageStepRequest: null,
   layerFrames: {},
   selectedLayers: [],
   selectedPages: [],
@@ -122,6 +125,7 @@ export const useKoharuStore = create<KoharuStore>()((set) => ({
       shortcuts: { ...state.shortcuts, [action]: key.toLowerCase().slice(0, 1) },
     })),
   requestCanvasView: (action) => set({ canvasViewRequest: { action } }),
+  requestPageStep: (step) => set({ pageStepRequest: { step } }),
   dismissJob: (id) =>
     set((state) => {
       const jobs = { ...state.jobs }

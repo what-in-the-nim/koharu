@@ -257,6 +257,8 @@
     "github": "GitHub",
     "help": "ช่วยเหลือ",
     "import": "นำเข้าหน้า",
+    "nextPage": "หน้าถัดไป",
+    "previousPage": "หน้าก่อนหน้า",
     "process": "ประมวลผล",
     "processLayers": "ประมวลผลเลเยอร์ที่เลือก",
     "processPages": "ประมวลผลหน้าที่เลือก",

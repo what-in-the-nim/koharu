@@ -257,6 +257,8 @@
     "github": "GitHub",
     "help": "Ajuda",
     "import": "Importar páginas",
+    "nextPage": "Próxima página",
+    "previousPage": "Página anterior",
     "process": "Processar",
     "processLayers": "Processar camadas selecionadas",
     "processPages": "Processar páginas selecionadas",

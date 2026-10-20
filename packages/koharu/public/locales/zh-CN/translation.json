@@ -257,6 +257,8 @@
     "github": "GitHub",
     "help": "帮助",
     "import": "导入页面",
+    "nextPage": "下一页",
+    "previousPage": "上一页",
     "process": "处理",
     "processLayers": "处理所选图层",
     "processPages": "处理所选页面",

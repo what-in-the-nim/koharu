@@ -51,7 +51,9 @@ export function TitleBar() {
   const selectLayers = useKoharuStore((state) => state.selectLayers)
   const setSettingsOpen = useKoharuStore((state) => state.setSettingsOpen)
   const requestCanvasView = useKoharuStore((state) => state.requestCanvasView)
+  const requestPageStep = useKoharuStore((state) => state.requestPageStep)
   const fitShortcut = useKoharuStore((state) => state.shortcuts.fit)
+  const pageIndex = page ? pages.findIndex((candidate) => candidate.id === page.id) : -1
   const { importPages, importing } = useImportPages()
   const { run: exportProject, busy: exporting } = useCommand(
     ['export-project'],
@@ -251,6 +253,18 @@ export function TitleBar() {
               <MenubarItem disabled={!page} onClick={() => requestCanvasView('fit')}>
                 {t('menu.fit')}
                 <MenubarShortcut>{fitShortcut.toUpperCase()}</MenubarShortcut>
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem disabled={pageIndex <= 0} onClick={() => requestPageStep(-1)}>
+                {t('menu.previousPage')}
+                <MenubarShortcut>PgUp</MenubarShortcut>
+              </MenubarItem>
+              <MenubarItem
+                disabled={pageIndex < 0 || pageIndex >= pages.length - 1}
+                onClick={() => requestPageStep(1)}
+              >
+                {t('menu.nextPage')}
+                <MenubarShortcut>PgDn</MenubarShortcut>
               </MenubarItem>
             </MenubarContent>
           </MenubarMenu>
