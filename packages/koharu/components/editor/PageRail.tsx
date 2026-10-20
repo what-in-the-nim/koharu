@@ -11,7 +11,7 @@ import {
   Settings,
   Trash2,
 } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { ResourceMonitor } from '@/components/editor/ResourceMonitor'
@@ -163,6 +163,41 @@ export function PageRail() {
       synchronize()
     }
   }
+
+  // Keyboard and menu page steps share the selection path of a click.
+  const stepPage = useEffectEvent((step: 1 | -1) => {
+    const index = pages.findIndex((page) => page.id === active)
+    const next = index + step
+    if (index < 0 || !pages[next]) return
+    select(next, false, false)
+    const visibleIndex = visiblePages.findIndex(({ index }) => index === next)
+    if (visibleIndex >= 0) pageVirtualizer.scrollToIndex(visibleIndex)
+  })
+
+  useEffect(() => {
+    const down = (event: KeyboardEvent) => {
+      if (event.key !== 'PageUp' && event.key !== 'PageDown') return
+      if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return
+      const target = event.target
+      if (
+        target !== document.body &&
+        !(target instanceof HTMLElement && target.dataset.canvasSurface !== undefined) &&
+        !(target instanceof Node && pageList.current?.contains(target))
+      )
+        return
+      event.preventDefault()
+      useKoharuStore.getState().requestPageStep(event.key === 'PageDown' ? 1 : -1)
+    }
+    window.addEventListener('keydown', down)
+    const unsubscribe = useKoharuStore.subscribe((state, previous) => {
+      const request = state.pageStepRequest
+      if (request && request !== previous.pageStepRequest) stepPage(request.step)
+    })
+    return () => {
+      window.removeEventListener('keydown', down)
+      unsubscribe()
+    }
+  }, [])
 
   const prefetchOnIntent = (page: string) => {
     const project = queryClient.getQueryData<ProjectInfo | null>(projectKey)

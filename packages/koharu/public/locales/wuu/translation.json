@@ -246,6 +246,7 @@
   },
   "menu": {
     "about": "关于",
+    "actualSize": "实际大小",
     "closeProject": "关闭项目",
     "delete": "删除拣中个内容",
     "discord": "Discord",
@@ -256,6 +257,8 @@
     "github": "GitHub",
     "help": "帮助",
     "import": "导入页面",
+    "nextPage": "下一页",
+    "previousPage": "上一页",
     "process": "处理",
     "processLayers": "处理拣中个图层",
     "processPages": "处理拣中个页面",
@@ -265,7 +268,9 @@
     "selectAllLayers": "图层侪选",
     "settings": "设置",
     "undo": "撤销",
-    "view": "视图"
+    "view": "视图",
+    "zoomIn": "放大",
+    "zoomOut": "缩小"
   },
   "model": {
     "baseUrl": "基础 URL",

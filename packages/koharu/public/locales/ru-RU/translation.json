@@ -246,6 +246,7 @@
   },
   "menu": {
     "about": "О программе",
+    "actualSize": "Реальный размер",
     "closeProject": "Закрыть проект",
     "delete": "Удалить выбранное",
     "discord": "Discord",
@@ -256,6 +257,8 @@
     "github": "GitHub",
     "help": "Справка",
     "import": "Импортировать страницы",
+    "nextPage": "Следующая страница",
+    "previousPage": "Предыдущая страница",
     "process": "Обработка",
     "processLayers": "Обработать выбранные слои",
     "processPages": "Обработать выбранные страницы",
@@ -265,7 +268,9 @@
     "selectAllLayers": "Выбрать все слои",
     "settings": "Настройки",
     "undo": "Отменить",
-    "view": "Вид"
+    "view": "Вид",
+    "zoomIn": "Увеличить",
+    "zoomOut": "Уменьшить"
   },
   "model": {
     "baseUrl": "Базовый URL",

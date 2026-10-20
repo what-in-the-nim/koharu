@@ -246,6 +246,7 @@
   },
   "menu": {
     "about": "À propos",
+    "actualSize": "Taille réelle",
     "closeProject": "Fermer le projet",
     "delete": "Supprimer la sélection",
     "discord": "Discord",
@@ -256,6 +257,8 @@
     "github": "GitHub",
     "help": "Aide",
     "import": "Importer des pages",
+    "nextPage": "Page suivante",
+    "previousPage": "Page précédente",
     "process": "Traitement",
     "processLayers": "Traiter les calques sélectionnés",
     "processPages": "Traiter les pages sélectionnées",
@@ -265,7 +268,9 @@
     "selectAllLayers": "Sélectionner tous les calques",
     "settings": "Paramètres",
     "undo": "Annuler",
-    "view": "Affichage"
+    "view": "Affichage",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière"
   },
   "model": {
     "baseUrl": "URL de base",

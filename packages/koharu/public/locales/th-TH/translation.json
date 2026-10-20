@@ -246,6 +246,7 @@
   },
   "menu": {
     "about": "เกี่ยวกับ",
+    "actualSize": "ขนาดจริง",
     "closeProject": "ปิดโปรเจกต์",
     "delete": "ลบรายการที่เลือก",
     "discord": "Discord",
@@ -256,6 +257,8 @@
     "github": "GitHub",
     "help": "ช่วยเหลือ",
     "import": "นำเข้าหน้า",
+    "nextPage": "หน้าถัดไป",
+    "previousPage": "หน้าก่อนหน้า",
     "process": "ประมวลผล",
     "processLayers": "ประมวลผลเลเยอร์ที่เลือก",
     "processPages": "ประมวลผลหน้าที่เลือก",
@@ -265,7 +268,9 @@
     "selectAllLayers": "เลือกเลเยอร์ทั้งหมด",
     "settings": "การตั้งค่า",
     "undo": "เลิกทำ",
-    "view": "มุมมอง"
+    "view": "มุมมอง",
+    "zoomIn": "ซูมเข้า",
+    "zoomOut": "ซูมออก"
   },
   "model": {
     "baseUrl": "URL หลัก",

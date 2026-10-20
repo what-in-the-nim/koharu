@@ -36,6 +36,7 @@ export interface CanvasBrush {
   color: string
 }
 export type ShortcutAction = CanvasTool | 'fit'
+export type CanvasViewAction = 'fit' | 'zoom-in' | 'zoom-out' | 'actual-size'
 export type Shortcuts = Record<ShortcutAction, string>
 export type PipelineScope = 'page' | 'selected-pages' | 'project'
 export const pipelineStages: readonly Stage[] = ['detection', 'ocr', 'translation', 'inpainting']
@@ -52,7 +53,9 @@ interface KoharuStore {
   canvasRevision: number | null
   canvasGeneration: number
   canvasSize: [number, number]
-  fitCanvasRequest: number
+  // Requests are fresh objects so that repeating the same action still notifies subscribers.
+  canvasViewRequest: { action: CanvasViewAction } | null
+  pageStepRequest: { step: 1 | -1 } | null
   layerFrames: Record<EntityId, Frame>
   selectedLayers: EntityId[]
   selectedPages: EntityId[]
@@ -70,7 +73,8 @@ interface KoharuStore {
   setTool: (tool: CanvasTool) => void
   setBrush: (brush: CanvasBrush) => void
   setShortcut: (action: ShortcutAction, key: string) => void
-  requestCanvasFit: () => void
+  requestCanvasView: (action: CanvasViewAction) => void
+  requestPageStep: (step: 1 | -1) => void
   dismissJob: (id: string) => void
   dismissDownload: (id: number) => void
 }
@@ -98,7 +102,8 @@ export const useKoharuStore = create<KoharuStore>()((set) => ({
   canvasRevision: null,
   canvasGeneration: 0,
   canvasSize: [0, 0],
-  fitCanvasRequest: 0,
+  canvasViewRequest: null,
+  pageStepRequest: null,
   layerFrames: {},
   selectedLayers: [],
   selectedPages: [],
@@ -119,7 +124,8 @@ export const useKoharuStore = create<KoharuStore>()((set) => ({
     set((state) => ({
       shortcuts: { ...state.shortcuts, [action]: key.toLowerCase().slice(0, 1) },
     })),
-  requestCanvasFit: () => set((state) => ({ fitCanvasRequest: state.fitCanvasRequest + 1 })),
+  requestCanvasView: (action) => set({ canvasViewRequest: { action } }),
+  requestPageStep: (step) => set({ pageStepRequest: { step } }),
   dismissJob: (id) =>
     set((state) => {
       const jobs = { ...state.jobs }

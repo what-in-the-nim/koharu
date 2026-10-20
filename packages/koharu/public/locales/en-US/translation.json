@@ -246,6 +246,7 @@
   },
   "menu": {
     "about": "About",
+    "actualSize": "Actual Size",
     "closeProject": "Close Project",
     "delete": "Delete Selected",
     "discord": "Discord",
@@ -256,6 +257,8 @@
     "github": "GitHub",
     "help": "Help",
     "import": "Import Pages",
+    "nextPage": "Next Page",
+    "previousPage": "Previous Page",
     "process": "Process",
     "processLayers": "Process Selected Layers",
     "processPages": "Process Selected Pages",
@@ -265,7 +268,9 @@
     "selectAllLayers": "Select All Layers",
     "settings": "Settings",
     "undo": "Undo",
-    "view": "View"
+    "view": "View",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out"
   },
   "model": {
     "baseUrl": "Base URL",

@@ -246,6 +246,7 @@
   },
   "menu": {
     "about": "關於",
+    "actualSize": "實際大小",
     "closeProject": "關閉專案",
     "delete": "刪除所選項目",
     "discord": "Discord",
@@ -256,6 +257,8 @@
     "github": "GitHub",
     "help": "說明",
     "import": "匯入頁面",
+    "nextPage": "下一頁",
+    "previousPage": "上一頁",
     "process": "處理",
     "processLayers": "處理所選圖層",
     "processPages": "處理所選頁面",
@@ -265,7 +268,9 @@
     "selectAllLayers": "選取所有圖層",
     "settings": "設定",
     "undo": "復原",
-    "view": "檢視"
+    "view": "檢視",
+    "zoomIn": "放大",
+    "zoomOut": "縮小"
   },
   "model": {
     "baseUrl": "基礎 URL",

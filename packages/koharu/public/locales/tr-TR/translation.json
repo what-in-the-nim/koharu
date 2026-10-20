@@ -246,6 +246,7 @@
   },
   "menu": {
     "about": "Hakkında",
+    "actualSize": "Gerçek Boyut",
     "closeProject": "Projeyi Kapat",
     "delete": "Seçilenleri Sil",
     "discord": "Discord",
@@ -256,6 +257,8 @@
     "github": "GitHub",
     "help": "Yardım",
     "import": "Sayfaları İçe Aktar",
+    "nextPage": "Sonraki Sayfa",
+    "previousPage": "Önceki Sayfa",
     "process": "İşle",
     "processLayers": "Seçili Katmanları İşle",
     "processPages": "Seçili Sayfaları İşle",
@@ -265,7 +268,9 @@
     "selectAllLayers": "Tüm Katmanları Seç",
     "settings": "Ayarlar",
     "undo": "Geri Al",
-    "view": "Görünüm"
+    "view": "Görünüm",
+    "zoomIn": "Yakınlaştır",
+    "zoomOut": "Uzaklaştır"
   },
   "model": {
     "baseUrl": "Temel URL",
