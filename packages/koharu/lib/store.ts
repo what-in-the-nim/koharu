@@ -35,7 +35,6 @@ export interface CanvasBrush {
   diameter: number
   color: string
 }
-export type InspectorSection = 'copy' | 'type' | 'layers'
 export type ShortcutAction = CanvasTool | 'fit'
 export type Shortcuts = Record<ShortcutAction, string>
 export type PipelineScope = 'page' | 'selected-pages' | 'project'
@@ -59,13 +58,11 @@ interface KoharuStore {
   selectedPages: EntityId[]
   tool: CanvasTool
   brush: CanvasBrush
-  inspector: InspectorSection
   processingScope: PipelineScope
   processingStages: Stage[]
   settingsOpen: boolean
   shortcuts: Shortcuts
   selectPages: (pages: EntityId[]) => void
-  showInspector: (section: InspectorSection) => void
   setProcessingScope: (scope: PipelineScope) => void
   setProcessingStages: (stages: Stage[]) => void
   setSettingsOpen: (open: boolean) => void
@@ -107,13 +104,11 @@ export const useKoharuStore = create<KoharuStore>()((set) => ({
   selectedPages: [],
   tool: 'select',
   brush: { diameter: 48, color: '#FFFFFF' },
-  inspector: 'copy',
   processingScope: 'selected-pages',
   processingStages: [...pipelineStages],
   settingsOpen: false,
   shortcuts: defaultShortcuts,
   selectPages: (selectedPages) => set({ selectedPages: [...new Set(selectedPages)] }),
-  showInspector: (inspector) => set({ inspector }),
   setProcessingScope: (processingScope) => set({ processingScope }),
   setProcessingStages: (processingStages) => set({ processingStages }),
   setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
