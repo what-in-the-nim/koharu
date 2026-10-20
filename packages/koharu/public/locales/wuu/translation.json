@@ -246,6 +246,7 @@
   },
   "menu": {
     "about": "关于",
+    "actualSize": "实际大小",
     "closeProject": "关闭项目",
     "delete": "删除拣中个内容",
     "discord": "Discord",
@@ -265,7 +266,9 @@
     "selectAllLayers": "图层侪选",
     "settings": "设置",
     "undo": "撤销",
-    "view": "视图"
+    "view": "视图",
+    "zoomIn": "放大",
+    "zoomOut": "缩小"
   },
   "model": {
     "baseUrl": "基础 URL",

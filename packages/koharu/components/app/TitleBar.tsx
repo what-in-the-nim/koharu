@@ -50,7 +50,8 @@ export function TitleBar() {
   const selectedLayers = useKoharuStore((state) => state.selectedLayers)
   const selectLayers = useKoharuStore((state) => state.selectLayers)
   const setSettingsOpen = useKoharuStore((state) => state.setSettingsOpen)
-  const requestCanvasFit = useKoharuStore((state) => state.requestCanvasFit)
+  const requestCanvasView = useKoharuStore((state) => state.requestCanvasView)
+  const fitShortcut = useKoharuStore((state) => state.shortcuts.fit)
   const { importPages, importing } = useImportPages()
   const { run: exportProject, busy: exporting } = useCommand(
     ['export-project'],
@@ -235,8 +236,21 @@ export function TitleBar() {
           <MenubarMenu>
             <MenubarTrigger>{t('menu.view')}</MenubarTrigger>
             <MenubarContent>
-              <MenubarItem disabled={!page} onClick={requestCanvasFit}>
+              <MenubarItem disabled={!page} onClick={() => requestCanvasView('zoom-in')}>
+                {t('menu.zoomIn')}
+                <MenubarShortcut>Ctrl++</MenubarShortcut>
+              </MenubarItem>
+              <MenubarItem disabled={!page} onClick={() => requestCanvasView('zoom-out')}>
+                {t('menu.zoomOut')}
+                <MenubarShortcut>Ctrl+-</MenubarShortcut>
+              </MenubarItem>
+              <MenubarItem disabled={!page} onClick={() => requestCanvasView('actual-size')}>
+                {t('menu.actualSize')}
+                <MenubarShortcut>Ctrl+1</MenubarShortcut>
+              </MenubarItem>
+              <MenubarItem disabled={!page} onClick={() => requestCanvasView('fit')}>
                 {t('menu.fit')}
+                <MenubarShortcut>{fitShortcut.toUpperCase()}</MenubarShortcut>
               </MenubarItem>
             </MenubarContent>
           </MenubarMenu>

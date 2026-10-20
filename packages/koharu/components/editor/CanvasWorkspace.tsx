@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useColorSampling } from '@/components/controls/ColorSampling'
@@ -37,12 +37,17 @@ import {
   receiveError,
   useKoharuStore,
   type CanvasTool,
+  type CanvasViewAction,
 } from '@/lib/store'
 import { prefetchCanvasPages, workspaceColor, type CanvasColor } from '@koharu/bridge/canvas'
 import { commands, type Frame, type Point, type TransformFrame } from '@koharu/bridge/protocol'
 import { Button } from '@koharu/ui/components/button'
 
 const BRUSH_DIAMETER_STEP = 4
+// Photoshop's zoom-in/out stops, limited to the range that wheel zoom allows.
+const ZOOM_STEPS = [
+  0.0625, 0.0833, 0.125, 0.1667, 0.25, 0.3333, 0.5, 0.6667, 1, 2, 3, 4, 5, 6, 7, 8, 12, 16,
+]
 
 const canvasCursors = {
   select: undefined,
@@ -104,7 +109,6 @@ export function CanvasWorkspace() {
   const canvasRevision = useKoharuStore((state) => state.canvasRevision)
   const canvasGeneration = useKoharuStore((state) => state.canvasGeneration)
   const canvasSize = useKoharuStore((state) => state.canvasSize)
-  const fitCanvasRequest = useKoharuStore((state) => state.fitCanvasRequest)
   const layerFrames = useKoharuStore((state) => state.layerFrames)
   const tool = useKoharuStore((state) => state.tool)
   const brush = useKoharuStore((state) => state.brush)
@@ -112,7 +116,7 @@ export function CanvasWorkspace() {
   const selectLayers = useKoharuStore((state) => state.selectLayers)
   const setTool = useKoharuStore((state) => state.setTool)
   const setBrush = useKoharuStore((state) => state.setBrush)
-  const requestCanvasFit = useKoharuStore((state) => state.requestCanvasFit)
+  const requestCanvasView = useKoharuStore((state) => state.requestCanvasView)
   const canvasState = useCanvas(canvasElement, canvasRevision, canvasGeneration)
   const canvas = canvasState.canvas
   const pageId = page?.id
@@ -319,7 +323,31 @@ export function CanvasWorkspace() {
 
   useEffect(() => {
     fitCanvas()
-  }, [fitCanvas, fitCanvasRequest])
+  }, [fitCanvas])
+
+  // View requests come from both the menu and the keyboard; only a new request applies, so a
+  // remount does not replay the last zoom.
+  const applyView = useEffectEvent((action: CanvasViewAction) => {
+    if (!page) return
+    if (action === 'fit') return fitCanvas()
+    if (action === 'actual-size') return setZoom(1)
+    const zoom = useKoharuStore.getState().camera.zoom
+    // A stop within 1% would look like no change, e.g. a fitted 199.7% stepping to 200%.
+    const next =
+      action === 'zoom-out'
+        ? ZOOM_STEPS.findLast((step) => step < zoom / 1.01)
+        : ZOOM_STEPS.find((step) => step > zoom * 1.01)
+    if (next !== undefined) setZoom(next)
+  })
+
+  useEffect(
+    () =>
+      useKoharuStore.subscribe((state, previous) => {
+        const request = state.canvasViewRequest
+        if (request && request !== previous.canvasViewRequest) applyView(request.action)
+      }),
+    [],
+  )
 
   useEffect(() => cancelGesture, [cancelGesture, canvasGeneration, canvasRevision, page?.id, tool])
 
@@ -342,6 +370,16 @@ export function CanvasWorkspace() {
         return
       }
       const command = event.ctrlKey || event.metaKey
+      if (command && (event.key === '=' || event.key === '+' || event.key === '-')) {
+        event.preventDefault()
+        requestCanvasView(event.key === '-' ? 'zoom-out' : 'zoom-in')
+        return
+      }
+      if (command && event.key === '1') {
+        event.preventDefault()
+        requestCanvasView('actual-size')
+        return
+      }
       if (command && event.key.toLowerCase() === 'z') {
         event.preventDefault()
         void call(event.shiftKey ? commands.redo : commands.undo)
@@ -365,7 +403,7 @@ export function CanvasWorkspace() {
         return
       }
       if (event.key.toLowerCase() === state.shortcuts.fit) {
-        requestCanvasFit()
+        requestCanvasView('fit')
         return
       }
       if (event.key === 'Escape') {
@@ -397,7 +435,7 @@ export function CanvasWorkspace() {
       window.removeEventListener('keyup', up)
       window.removeEventListener('blur', blur)
     }
-  }, [cancelGesture, colorSampling, page, requestCanvasFit, selectLayers, setTool])
+  }, [cancelGesture, colorSampling, page, requestCanvasView, selectLayers, setTool])
 
   const clientPagePoint = (clientX: number, clientY: number) =>
     pagePoint(

@@ -246,6 +246,7 @@
   },
   "menu": {
     "about": "Hakkında",
+    "actualSize": "Gerçek Boyut",
     "closeProject": "Projeyi Kapat",
     "delete": "Seçilenleri Sil",
     "discord": "Discord",
@@ -265,7 +266,9 @@
     "selectAllLayers": "Tüm Katmanları Seç",
     "settings": "Ayarlar",
     "undo": "Geri Al",
-    "view": "Görünüm"
+    "view": "Görünüm",
+    "zoomIn": "Yakınlaştır",
+    "zoomOut": "Uzaklaştır"
   },
   "model": {
     "baseUrl": "Temel URL",

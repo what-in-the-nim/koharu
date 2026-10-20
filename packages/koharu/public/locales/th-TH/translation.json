@@ -246,6 +246,7 @@
   },
   "menu": {
     "about": "เกี่ยวกับ",
+    "actualSize": "ขนาดจริง",
     "closeProject": "ปิดโปรเจกต์",
     "delete": "ลบรายการที่เลือก",
     "discord": "Discord",
@@ -265,7 +266,9 @@
     "selectAllLayers": "เลือกเลเยอร์ทั้งหมด",
     "settings": "การตั้งค่า",
     "undo": "เลิกทำ",
-    "view": "มุมมอง"
+    "view": "มุมมอง",
+    "zoomIn": "ซูมเข้า",
+    "zoomOut": "ซูมออก"
   },
   "model": {
     "baseUrl": "URL หลัก",

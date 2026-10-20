@@ -246,6 +246,7 @@
   },
   "menu": {
     "about": "About",
+    "actualSize": "Actual Size",
     "closeProject": "Close Project",
     "delete": "Delete Selected",
     "discord": "Discord",
@@ -265,7 +266,9 @@
     "selectAllLayers": "Select All Layers",
     "settings": "Settings",
     "undo": "Undo",
-    "view": "View"
+    "view": "View",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out"
   },
   "model": {
     "baseUrl": "Base URL",

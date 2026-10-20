@@ -246,6 +246,7 @@
   },
   "menu": {
     "about": "Sobre",
+    "actualSize": "Tamanho real",
     "closeProject": "Fechar projeto",
     "delete": "Excluir seleção",
     "discord": "Discord",
@@ -265,7 +266,9 @@
     "selectAllLayers": "Selecionar todas as camadas",
     "settings": "Configurações",
     "undo": "Desfazer",
-    "view": "Exibir"
+    "view": "Exibir",
+    "zoomIn": "Aumentar zoom",
+    "zoomOut": "Diminuir zoom"
   },
   "model": {
     "baseUrl": "URL base",

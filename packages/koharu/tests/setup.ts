@@ -81,7 +81,7 @@ beforeEach(() => {
     canvasRevision: null,
     canvasGeneration: 0,
     canvasSize: [0, 0],
-    fitCanvasRequest: 0,
+    canvasViewRequest: null,
     layerFrames: {},
     selectedLayers: [],
     selectedPages: [],

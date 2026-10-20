@@ -246,6 +246,7 @@
   },
   "menu": {
     "about": "À propos",
+    "actualSize": "Taille réelle",
     "closeProject": "Fermer le projet",
     "delete": "Supprimer la sélection",
     "discord": "Discord",
@@ -265,7 +266,9 @@
     "selectAllLayers": "Sélectionner tous les calques",
     "settings": "Paramètres",
     "undo": "Annuler",
-    "view": "Affichage"
+    "view": "Affichage",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière"
   },
   "model": {
     "baseUrl": "URL de base",

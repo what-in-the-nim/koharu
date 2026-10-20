@@ -246,6 +246,7 @@
   },
   "menu": {
     "about": "О программе",
+    "actualSize": "Реальный размер",
     "closeProject": "Закрыть проект",
     "delete": "Удалить выбранное",
     "discord": "Discord",
@@ -265,7 +266,9 @@
     "selectAllLayers": "Выбрать все слои",
     "settings": "Настройки",
     "undo": "Отменить",
-    "view": "Вид"
+    "view": "Вид",
+    "zoomIn": "Увеличить",
+    "zoomOut": "Уменьшить"
   },
   "model": {
     "baseUrl": "Базовый URL",
