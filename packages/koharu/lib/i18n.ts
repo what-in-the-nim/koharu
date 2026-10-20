@@ -12,6 +12,7 @@ import jaJP from '@/public/locales/ja-JP/translation.json'
 import koKR from '@/public/locales/ko-KR/translation.json'
 import ptBR from '@/public/locales/pt-BR/translation.json'
 import ruRU from '@/public/locales/ru-RU/translation.json'
+import thTH from '@/public/locales/th-TH/translation.json'
 import trTR from '@/public/locales/tr-TR/translation.json'
 import wuu from '@/public/locales/wuu/translation.json'
 import zhCN from '@/public/locales/zh-CN/translation.json'
@@ -29,6 +30,7 @@ export const resources = {
   'pt-BR': { translation: ptBR },
   wuu: { translation: wuu },
   'fr-FR': { translation: frFR },
+  'th-TH': { translation: thTH },
 } satisfies Resource
 
 export type SupportedLanguage = keyof typeof resources
