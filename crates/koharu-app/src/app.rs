@@ -134,13 +134,21 @@ pub fn run(context: tauri::Context<CefRuntime>) -> Result<()> {
                 .iter()
                 .find(|window| window.label == "main")
                 .context("the main Tauri window configuration is unavailable")?;
-            let window = tauri::WebviewWindowBuilder::from_config(application, window_config)?
+            let builder = tauri::WebviewWindowBuilder::from_config(application, window_config)?;
+            // Showing and refocusing a hidden CEF window can leave X11 keyboard focus on
+            // GTK's proxy instead of the browser: tauri-apps/tauri#16251.
+            #[cfg(target_os = "linux")]
+            let builder = builder.visible(true);
+            let _window = builder
                 .build()
                 .context("failed to create the main window")?;
-            window.show().context("failed to show the main window")?;
-            window
-                .set_focus()
-                .context("failed to focus the main window")?;
+            #[cfg(not(target_os = "linux"))]
+            {
+                _window.show().context("failed to show the main window")?;
+                _window
+                    .set_focus()
+                    .context("failed to focus the main window")?;
+            }
             let initialization_handle = handle.clone();
             drop(tauri::async_runtime::spawn(async move {
                 initialize(initialization_handle.clone())
