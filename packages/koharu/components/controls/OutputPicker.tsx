@@ -118,7 +118,7 @@ export function OutputPicker({
       </div>
 
       <div className='grid gap-2 p-1'>
-        <label className='grid gap-1 text-[9px] text-muted-foreground'>
+        <label className='grid gap-1 text-[10px] text-muted-foreground'>
           {t('model.targetLanguage')}
           <Select
             value={draft.targetLanguage}
@@ -146,7 +146,7 @@ export function OutputPicker({
           </Select>
         </label>
 
-        <label className='grid gap-1 text-[9px] text-muted-foreground'>
+        <label className='grid gap-1 text-[10px] text-muted-foreground'>
           {t('model.instructions')}
           <Textarea
             value={draft.instructions}

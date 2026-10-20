@@ -175,7 +175,7 @@ function ModelLabel({
 }) {
   return (
     <span className='flex min-w-0 items-center gap-2'>
-      <Badge variant='outline' className='shrink-0 px-1.5 py-0 text-[9px] font-medium'>
+      <Badge variant='outline' className='shrink-0 px-1.5 py-0 text-[10px] font-medium'>
         {providerName(providers, model.provider)}
       </Badge>
       <span className='truncate'>

@@ -234,7 +234,7 @@ export function PageRail() {
         <header className='flex h-10 shrink-0 items-center px-2.5'>
           <div className='flex min-w-0 items-center gap-2'>
             <h2 className='text-[11px] font-semibold'>{t('navigator.pages')}</h2>
-            <span className='rounded-full bg-primary/[0.07] px-1.5 py-0.5 text-[9px] text-muted-foreground tabular-nums'>
+            <span className='rounded-full bg-primary/[0.07] px-1.5 py-0.5 text-[10px] text-muted-foreground tabular-nums'>
               {pages.length}
             </span>
           </div>
@@ -244,7 +244,7 @@ export function PageRail() {
             <span
               role='status'
               aria-live='polite'
-              className='ml-auto text-[9px] text-muted-foreground tabular-nums'
+              className='ml-auto text-[10px] text-muted-foreground tabular-nums'
             >
               {t('navigator.selected', { count: selected.length })}
             </span>
@@ -501,7 +501,7 @@ function PageItem({
         {page.source_asset ? (
           <PageThumbnail page={page.id} asset={page.source_asset} label={page.label} />
         ) : (
-          <span className='text-[9px] text-muted-foreground'>{t('navigator.noImage')}</span>
+          <span className='text-[10px] text-muted-foreground'>{t('navigator.noImage')}</span>
         )}
       </div>
       <div className='min-w-0 py-0.5'>
@@ -529,10 +529,10 @@ function PageItem({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <p className='mt-1 text-[9px] leading-3.5 text-muted-foreground'>
+        <p className='mt-1 text-[10px] leading-3.5 text-muted-foreground'>
           {t('navigator.layerCount', { count: page.layer_count })}
         </p>
-        <p className='mt-1 text-[9px] text-muted-foreground tabular-nums'>
+        <p className='mt-1 text-[10px] text-muted-foreground tabular-nums'>
           {page.size.width} × {page.size.height}
         </p>
       </div>
@@ -574,7 +574,7 @@ function PageThumbnail({ page, asset, label }: { page: string; asset: string; la
         // eslint-disable-next-line @next/next/no-img-element
         <img src={source} alt={label} draggable={false} className='size-full object-contain' />
       ) : (
-        <span className='text-[9px] text-muted-foreground'>{t('common.loading')}</span>
+        <span className='text-[10px] text-muted-foreground'>{t('common.loading')}</span>
       )}
     </div>
   )

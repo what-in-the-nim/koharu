@@ -117,7 +117,7 @@ export function Inspector() {
         <h2 className='text-[10px] font-semibold'>{t('inspector.type')}</h2>
       </div>
 
-      <section className='h-48 min-w-0 shrink-0 overflow-hidden border-b'>
+      <section className='min-w-0 shrink-0 overflow-hidden border-b'>
         <TypeInspector />
       </section>
 
@@ -588,7 +588,7 @@ function LayersInspector() {
       <header className='flex h-8 shrink-0 items-center gap-1.5 border-b border-border/80 px-2'>
         <Layers3 className='size-3 text-primary' />
         <h2 className='text-[10px] font-semibold'>{t('layers.title')}</h2>
-        <span className='text-[9px] text-muted-foreground tabular-nums'>
+        <span className='text-[10px] text-muted-foreground tabular-nums'>
           {page.layers.filter((layer) => !isGroupLayer(layer)).length}
         </span>
       </header>
@@ -692,7 +692,7 @@ function LayerRow({
             <Icon className='size-3.5 shrink-0 text-muted-foreground' />
             <span className='min-w-0 flex-1'>
               <span className='block truncate text-[11px] font-medium'>{name}</span>
-              <span className='block truncate text-[9px] leading-3 text-muted-foreground capitalize'>
+              <span className='block truncate text-[10px] leading-4 text-muted-foreground capitalize'>
                 {detail}
               </span>
             </span>
@@ -722,7 +722,7 @@ function LayerRow({
             </div>
           )}
           {!expanded && (
-            <span className='w-7 shrink-0 text-right text-[9px] text-muted-foreground tabular-nums'>
+            <span className='w-7 shrink-0 text-right text-[10px] text-muted-foreground tabular-nums'>
               {Math.round(layer.visibility.opacity * 100)}%
             </span>
           )}
@@ -801,7 +801,7 @@ function LayerEditor({ layer, onDelete }: { layer: Layer; onDelete?: () => void 
   return (
     <div className='grid min-w-0 gap-1.5 px-1.5 pt-0.5 pb-1.5'>
       <div className='flex min-w-0 items-center gap-1.5'>
-        <span className='shrink-0 text-[8px] font-medium text-muted-foreground uppercase'>
+        <span className='shrink-0 text-[10px] font-medium text-muted-foreground'>
           {t('inspector.opacity')}
         </span>
         <div className='flex min-w-0 flex-1 items-center gap-1.5'>
@@ -815,7 +815,7 @@ function LayerEditor({ layer, onDelete }: { layer: Layer; onDelete?: () => void 
             onValueChange={previewOpacity}
             onValueCommitted={commitOpacity}
           />
-          <span className='w-7 shrink-0 text-right text-[8px] text-muted-foreground tabular-nums'>
+          <span className='w-7 shrink-0 text-right text-[10px] text-muted-foreground tabular-nums'>
             {Math.round(opacity)}%
           </span>
         </div>
@@ -842,10 +842,10 @@ function LayerEditor({ layer, onDelete }: { layer: Layer; onDelete?: () => void 
       {isTextLayer(layer) && (
         <>
           <div className='flex h-5 min-w-0 items-center gap-1.5'>
-            <span className='text-[8px] font-medium text-muted-foreground uppercase'>
+            <span className='text-[10px] font-medium text-muted-foreground'>
               {t('inspector.placement')}
             </span>
-            <span className='rounded-md bg-foreground/[0.055] px-1.5 py-0.5 text-[9px] leading-none text-foreground/75'>
+            <span className='rounded-md bg-foreground/[0.055] px-1.5 py-0.5 text-[10px] leading-none text-foreground/75'>
               {layer.geometry
                 ? t('inspector.customFrame')
                 : layer.automatic_region
@@ -861,7 +861,7 @@ function LayerEditor({ layer, onDelete }: { layer: Layer; onDelete?: () => void 
                       variant='ghost'
                       size='xs'
                       aria-label={t('inspector.resetAutoFit')}
-                      className='ml-auto h-5 gap-1 rounded-md px-1.5 text-[9px] font-normal text-muted-foreground hover:text-foreground'
+                      className='ml-auto h-5 gap-1 rounded-md px-1.5 text-[10px] font-normal text-muted-foreground hover:text-foreground'
                       onClick={resetTextFrame}
                     />
                   }
@@ -910,9 +910,7 @@ function LayerEditor({ layer, onDelete }: { layer: Layer; onDelete?: () => void 
 function InspectorField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className='grid min-w-0 gap-0.5'>
-      <span className='text-[8px] font-medium tracking-[0.06em] text-muted-foreground uppercase'>
-        {label}
-      </span>
+      <span className='truncate text-[10px] font-medium text-muted-foreground'>{label}</span>
       {children}
     </div>
   )

@@ -144,7 +144,7 @@ export function ModelPicker({
                     {quantization?.name ?? model.name}
                   </span>
                   {!quantization && (
-                    <span className='block truncate text-[9px] text-muted-foreground'>
+                    <span className='block truncate text-[10px] text-muted-foreground'>
                       {provider}
                     </span>
                   )}
