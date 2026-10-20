@@ -506,30 +506,30 @@ export function CanvasWorkspace() {
       const operation =
         current.kind === 'paint'
           ? enqueue(() =>
-            call(commands.commitPaint, current.revision, current.layer, current.points, {
-              diameter: current.diameter,
-              color: current.color!,
-            }),
-          ).then((result) => {
-            selectLayers([result.layer])
-            return refresh(projectKey, pagesKey, pageKey)
-          })
-          : current.kind === 'erase'
-            ? enqueue(() =>
-              call(
-                commands.commitErase,
-                current.revision,
-                current.layer!,
-                current.points,
-                current.diameter,
-              ),
+              call(commands.commitPaint, current.revision, current.layer, current.points, {
+                diameter: current.diameter,
+                color: current.color!,
+              }),
             ).then((result) => {
               selectLayers([result.layer])
               return refresh(projectKey, pagesKey, pageKey)
             })
+          : current.kind === 'erase'
+            ? enqueue(() =>
+                call(
+                  commands.commitErase,
+                  current.revision,
+                  current.layer!,
+                  current.points,
+                  current.diameter,
+                ),
+              ).then((result) => {
+                selectLayers([result.layer])
+                return refresh(projectKey, pagesKey, pageKey)
+              })
             : enqueue(() =>
-              call(commands.commitInpaint, current.revision, current.points, current.diameter),
-            )
+                call(commands.commitInpaint, current.revision, current.points, current.diameter),
+              )
       commitPending.current = true
       void operation
         .catch(() => canvas?.cancelStroke())
@@ -919,7 +919,7 @@ class FrameCommand<Value> {
   constructor(
     private readonly execute: (value: Value) => void | Promise<unknown>,
     private readonly merge: (current: Value, next: Value) => Value = (_current, next) => next,
-  ) { }
+  ) {}
 
   schedule(value: Value): void {
     this.pending = this.pending === undefined ? value : this.merge(this.pending, value)
