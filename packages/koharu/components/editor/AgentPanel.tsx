@@ -100,7 +100,7 @@ export function AgentPanel() {
         <div className='flex min-w-0 items-center gap-2'>
           <div className='min-w-0 flex-1'>
             <p className='truncate text-[11px] font-medium'>{status.account.email ?? 'Codex'}</p>
-            <p className='truncate text-[9px] text-muted-foreground'>
+            <p className='truncate text-[10px] text-muted-foreground'>
               {status.account.plan ?? t('agent.account')}
             </p>
           </div>
@@ -222,7 +222,7 @@ export function AgentPanel() {
           <div className='flex items-center justify-between gap-2 pt-1'>
             <Badge
               variant='outline'
-              className='h-5 max-w-44 truncate px-1.5 text-[9px] font-normal'
+              className='h-5 max-w-44 truncate px-1.5 text-[10px] font-normal'
             >
               {selectedModel?.name ?? t('agent.automatic')}
             </Badge>

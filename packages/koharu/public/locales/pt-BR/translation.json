@@ -73,6 +73,7 @@
     "reset": "Redefinir"
   },
   "errors": {
+    "actionFailed": "Não foi possível concluir a ação",
     "fatalTitle": "O Koharu não pôde continuar",
     "tryAgain": "Tentar novamente"
   },

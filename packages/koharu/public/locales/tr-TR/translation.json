@@ -73,6 +73,7 @@
     "reset": "Sıfırla"
   },
   "errors": {
+    "actionFailed": "İşlem tamamlanamadı",
     "fatalTitle": "Koharu devam edemedi",
     "tryAgain": "Tekrar dene"
   },

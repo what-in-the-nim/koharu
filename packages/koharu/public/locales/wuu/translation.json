@@ -73,6 +73,7 @@
     "reset": "重置"
   },
   "errors": {
+    "actionFailed": "迭个操作做弗成功",
     "fatalTitle": "Koharu 运行弗下去哉",
     "tryAgain": "再试一趟"
   },

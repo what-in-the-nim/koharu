@@ -119,7 +119,7 @@ function ResourceRow({
       <Tooltip>
         <TooltipTrigger render={<span className='min-w-0' />}>
           <span className='block truncate text-foreground'>{label}</span>
-          <span className='block truncate text-[9px] text-muted-foreground'>{detail}</span>
+          <span className='block truncate text-[10px] text-muted-foreground'>{detail}</span>
         </TooltipTrigger>
         <TooltipContent side='left'>
           {label}: {detail}

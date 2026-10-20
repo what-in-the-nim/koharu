@@ -73,6 +73,7 @@
     "reset": "リセット"
   },
   "errors": {
+    "actionFailed": "操作を完了できませんでした",
     "fatalTitle": "Koharuを続行できませんでした",
     "tryAgain": "再試行"
   },

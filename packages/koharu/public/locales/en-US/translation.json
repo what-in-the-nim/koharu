@@ -73,6 +73,7 @@
     "reset": "Reset"
   },
   "errors": {
+    "actionFailed": "Could not complete that action",
     "fatalTitle": "Koharu could not continue",
     "tryAgain": "Try again"
   },

@@ -72,7 +72,7 @@ export function TypesettingPreferences({
                   >
                     <span
                       aria-hidden='true'
-                      className='flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-[9px] font-semibold text-muted-foreground tabular-nums'
+                      className='flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-[10px] font-semibold text-muted-foreground tabular-nums'
                     >
                       {String(index + 1).padStart(2, '0')}
                     </span>

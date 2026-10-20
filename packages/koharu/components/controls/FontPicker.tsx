@@ -229,7 +229,7 @@ function FontFilterMenu({
       >
         <ListFilter />
         {activeFilterCount > 0 && (
-          <Badge className='h-3.5 min-w-3.5 px-1 text-[8px]'>{activeFilterCount}</Badge>
+          <Badge className='h-3.5 min-w-3.5 px-1 text-[10px]'>{activeFilterCount}</Badge>
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' sideOffset={6} className='w-40'>
@@ -327,10 +327,10 @@ function FontResultSummary({
 }) {
   const { t } = useTranslation()
   return (
-    <div className='flex h-6 items-center justify-between px-2 text-[9px] text-muted-foreground'>
+    <div className='flex h-6 items-center justify-between px-2 text-[10px] text-muted-foreground'>
       <span>{t('fontPicker.fontCount', { count })}</span>
       {activeFilterCount > 0 ? (
-        <Button variant='ghost' size='xs' className='h-5 px-1.5 text-[9px]' onClick={onClear}>
+        <Button variant='ghost' size='xs' className='h-5 px-1.5 text-[10px]' onClick={onClear}>
           {t('fontPicker.activeFilterCount', { count: activeFilterCount })}
           <X />
         </Button>
@@ -410,7 +410,7 @@ function FontList({
             >
               <div className='flex min-w-0 flex-1 flex-col justify-center gap-px'>
                 <FontPreviewLabel family={family} className='h-4.5 w-full min-w-0' />
-                <div className='flex min-w-0 items-center justify-between gap-2 text-[8px] leading-none text-muted-foreground'>
+                <div className='flex min-w-0 items-center justify-between gap-2 text-[10px] leading-none text-muted-foreground'>
                   <span className='min-w-0 truncate'>{family.name}</span>
                   <span className='shrink-0'>{source}</span>
                 </div>

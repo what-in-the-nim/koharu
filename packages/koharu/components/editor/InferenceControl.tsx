@@ -430,7 +430,7 @@ function SelectorOption<Value extends string>({
     >
       <span className='min-w-0 flex-1'>
         <span className='block text-[11px]'>{label}</span>
-        <span className='block text-[9px] text-muted-foreground'>{detail}</span>
+        <span className='block text-[10px] text-muted-foreground'>{detail}</span>
       </span>
       {selected && <Check className='size-3.5 shrink-0 text-primary' />}
     </Button>

@@ -174,7 +174,7 @@ export function StartView() {
                   <h2 id='project-list-title' className='text-[12px] font-semibold'>
                     {t('start.yourProjects')}
                   </h2>
-                  <span className='ml-2 rounded-full bg-muted px-2 py-0.5 text-[9px] text-muted-foreground tabular-nums'>
+                  <span className='ml-2 rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground tabular-nums'>
                     {projects.length}
                   </span>
                 </header>
@@ -223,7 +223,7 @@ export function StartView() {
                               <span className='block truncate text-[11px] font-medium'>
                                 {project.name}
                               </span>
-                              <span className='mt-0.5 block text-[9px] text-muted-foreground'>
+                              <span className='mt-0.5 block text-[10px] text-muted-foreground'>
                                 {t('start.projectKind')}
                               </span>
                             </span>
