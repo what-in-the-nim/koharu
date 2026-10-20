@@ -412,6 +412,18 @@ export function CanvasWorkspace() {
         selectLayers([])
         return
       }
+      if ((event.key === '[' || event.key === ']') && page && isBrushTool(state.tool)) {
+        const delta = event.key === ']' ? BRUSH_DIAMETER_STEP : -BRUSH_DIAMETER_STEP
+        state.setBrush({
+          ...state.brush,
+          diameter: clamp(
+            state.brush.diameter + delta,
+            MIN_BRUSH_DIAMETER,
+            maxBrushDiameter(page.size),
+          ),
+        })
+        return
+      }
       const next = (
         ['select', 'text', 'draw', 'eraser', 'color_picker', 'remove', 'pan'] as const
       ).find((action) => state.shortcuts[action] === event.key.toLowerCase())
