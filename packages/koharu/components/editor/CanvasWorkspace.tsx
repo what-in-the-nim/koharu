@@ -48,6 +48,12 @@ const BRUSH_DIAMETER_STEP = 4
 const ZOOM_STEPS = [
   0.0625, 0.0833, 0.125, 0.1667, 0.25, 0.3333, 0.5, 0.6667, 1, 2, 3, 4, 5, 6, 7, 8, 12, 16,
 ]
+const NUDGE_DIRECTIONS: Record<string, Point> = {
+  ArrowLeft: { x: -1, y: 0 },
+  ArrowRight: { x: 1, y: 0 },
+  ArrowUp: { x: 0, y: -1 },
+  ArrowDown: { x: 0, y: 1 },
+}
 
 const canvasCursors = {
   select: undefined,
@@ -92,6 +98,7 @@ export function CanvasWorkspace() {
   const gesture = useRef<Gesture | null>(null)
   const previousPageIndex = useRef<number | null>(null)
   const spaceHeld = useRef(false)
+  const nudge = useRef<{ originals: TransformFrame[]; offset: Point } | null>(null)
   const transformActive = useRef(false)
   const transformRevision = useRef<number | null>(null)
   const transformFinal = useRef<TransformFrame[]>([])
@@ -211,6 +218,7 @@ export function CanvasWorkspace() {
   const cancelGesture = useCallback(() => {
     const current = gesture.current
     gesture.current = null
+    nudge.current = null
     if (current?.kind === 'paint' || current?.kind === 'erase' || current?.kind === 'inpaint') {
       strokeUpdates.clear()
       canvas?.cancelStroke()
@@ -351,6 +359,44 @@ export function CanvasWorkspace() {
 
   useEffect(() => cancelGesture, [cancelGesture, canvasGeneration, canvasRevision, page?.id, tool])
 
+  const framesFor = (layers: string[]): TransformFrame[] =>
+    expandLayerSelection(page?.layers ?? [], layers).flatMap((id) => {
+      const layer = page?.layers.find((candidate) => candidate.id === id)
+      const frame = layer && selectableLayer(layer) ? controlFrame(layer, layerFrames) : null
+      return frame ? [{ element: id, frame }] : []
+    })
+
+  // Arrow keys move the selection like a drag: the offset accumulates while the key is held and
+  // commits once on release, so a held nudge is one undo step.
+  const nudgeSelection = useEffectEvent((event: KeyboardEvent): boolean => {
+    const direction = NUDGE_DIRECTIONS[event.key]
+    if (!direction || tool !== 'select') return false
+    // Arrow keys belong to a focused control unless focus is on the canvas or nowhere.
+    if (event.target !== surface.current && event.target !== document.body) return false
+    event.preventDefault()
+    if (!nudge.current) {
+      const originals = framesFor(selected)
+      if (!originals.length) return true
+      beginTransform(originals)
+      if (!transformActive.current) return true
+      nudge.current = { originals, offset: { x: 0, y: 0 } }
+    }
+    const distance = event.shiftKey ? 10 : 1
+    const offset = {
+      x: nudge.current.offset.x + direction.x * distance,
+      y: nudge.current.offset.y + direction.y * distance,
+    }
+    nudge.current.offset = offset
+    updateTransform(translateFrames(nudge.current.originals, offset))
+    return true
+  })
+
+  const finishNudge = useEffectEvent((event: KeyboardEvent) => {
+    if (!nudge.current || !NUDGE_DIRECTIONS[event.key]) return
+    nudge.current = null
+    finishTransform()
+  })
+
   useEffect(() => {
     const editable = (target: EventTarget | null) =>
       target instanceof HTMLInputElement ||
@@ -424,6 +470,7 @@ export function CanvasWorkspace() {
         })
         return
       }
+      if (nudgeSelection(event)) return
       const next = (
         ['select', 'text', 'draw', 'eraser', 'color_picker', 'remove', 'pan'] as const
       ).find((action) => state.shortcuts[action] === event.key.toLowerCase())
@@ -433,6 +480,7 @@ export function CanvasWorkspace() {
     const up = (event: KeyboardEvent) => {
       if (event.key === 'Alt') event.preventDefault()
       if (event.code === 'Space') spaceHeld.current = false
+      finishNudge(event)
     }
     const blur = () => {
       spaceHeld.current = false
@@ -459,13 +507,6 @@ export function CanvasWorkspace() {
 
   const clientPhysicalPoint = (clientX: number, clientY: number) =>
     physicalPoint(clientX, clientY, surface.current!.getBoundingClientRect())
-
-  const framesFor = (layers: string[]): TransformFrame[] =>
-    expandLayerSelection(page?.layers ?? [], layers).flatMap((id) => {
-      const layer = page?.layers.find((candidate) => candidate.id === id)
-      const frame = layer && selectableLayer(layer) ? controlFrame(layer, layerFrames) : null
-      return frame ? [{ element: id, frame }] : []
-    })
 
   const moveGesture = (
     pointer: number,
