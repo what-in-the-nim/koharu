@@ -10,7 +10,12 @@ import { StatusBar } from '@/components/editor/StatusBar'
 import { ToolBar } from '@/components/editor/ToolBar'
 import { useCanvas } from '@/components/editor/useCanvas'
 import { call } from '@/lib/backend'
-import { expandLayerSelection } from '@/lib/document'
+import {
+  displayedLayers,
+  effectiveLayerVisibility,
+  expandLayerSelection,
+  isTextLayer,
+} from '@/lib/document'
 import {
   controlFrame,
   draftFrame,
@@ -406,6 +411,51 @@ export function CanvasWorkspace() {
     return true
   })
 
+  // Tab steps through visible text layers in the layer panel's order and centres each one at
+  // the current zoom, so every bubble can be proofread without the mouse.
+  const stepTextLayer = useEffectEvent((event: KeyboardEvent): boolean => {
+    if (event.key !== 'Tab' || event.ctrlKey || event.metaKey || event.altKey) return false
+    if (!page || tool !== 'select') return false
+    if (event.target !== surface.current && event.target !== document.body) return false
+    const texts = displayedLayers(page.layers, page.id).flatMap(({ layer }) => {
+      if (!isTextLayer(layer) || !effectiveLayerVisibility(page.layers, layer).visible) return []
+      const frame = controlFrame(layer, layerFrames)
+      return frame ? [{ layer, frame }] : []
+    })
+    if (!texts.length) return false
+    event.preventDefault()
+    const current =
+      selected.length === 1 ? texts.findIndex(({ layer }) => layer.id === selected[0]) : -1
+    const step = event.shiftKey ? -1 : 1
+    const next =
+      current < 0
+        ? step > 0
+          ? 0
+          : texts.length - 1
+        : (current + step + texts.length) % texts.length
+    const { layer, frame } = texts[next]!
+    selectLayers([layer.id])
+    const element = surface.current
+    if (!element) return true
+    const bounds = element.getBoundingClientRect()
+    const dpr = window.devicePixelRatio
+    const { zoom } = useKoharuStore.getState().camera
+    const translation = clampCameraTranslation(
+      [
+        bounds.width * dpr * 0.5 - (frame.x + frame.width * 0.5) * zoom,
+        bounds.height * dpr * 0.5 - (frame.y + frame.height * 0.5) * zoom,
+      ],
+      zoom,
+      pageWidth ?? page.size.width,
+      pageHeight ?? page.size.height,
+      bounds.width * dpr,
+      bounds.height * dpr,
+      dpr,
+    )
+    useKoharuStore.setState({ camera: { zoom, translation, fitted: false } })
+    return true
+  })
+
   const finishNudge = useEffectEvent((event: KeyboardEvent) => {
     if (!nudge.current || !NUDGE_DIRECTIONS[event.key]) return
     nudge.current = null
@@ -501,6 +551,7 @@ export function CanvasWorkspace() {
         return
       }
       if (nudgeSelection(event)) return
+      if (stepTextLayer(event)) return
       const next = (
         ['select', 'text', 'draw', 'eraser', 'color_picker', 'remove', 'pan'] as const
       ).find((action) => state.shortcuts[action] === event.key.toLowerCase())

@@ -1,4 +1,4 @@
-import type { Layer } from '@koharu/bridge/protocol'
+import type { EntityId, Layer } from '@koharu/bridge/protocol'
 
 export function isTextLayer(layer: Layer): layer is Extract<Layer, { type: 'text' }> {
   return layer.type === 'text'
@@ -43,4 +43,21 @@ export function effectiveLayerVisibility(layers: Layer[], layer: Layer) {
     parent = group.parent
   }
   return { visible, opacity }
+}
+
+// The layer panel's top-to-bottom order: roots and ordinary groups list the topmost layer first,
+// while a text group keeps its children in reading order.
+export function displayedLayers(layers: Layer[], page: EntityId) {
+  const indexes = new Map(layers.map((layer, index) => [layer.id, index]))
+  const rows: { layer: Layer; index: number; depth: number }[] = []
+  const append = (layer: Layer, depth: number) => {
+    rows.push({ layer, index: indexes.get(layer.id) ?? 0, depth })
+    if (!isGroupLayer(layer)) return
+    const children = layerChildren(layers, layer.id)
+    const ordered = layer.role === 'text' ? children : [...children].reverse()
+    for (const child of ordered) append(child, depth + 1)
+  }
+  const roots = layers.filter((layer) => (layer.parent ?? page) === page).reverse()
+  for (const layer of roots) append(layer, 0)
+  return rows
 }
