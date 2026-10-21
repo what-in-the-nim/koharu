@@ -99,21 +99,36 @@ export async function createCanvas(
   let activeManifest: Uint8Array | null = null
   const cachedManifests = new Map<string, Uint8Array>()
   canvas.setDeviceLostCallback(onDeviceLost)
+  // A disposed handle stays reachable from closures React has not re-rendered yet: Fast
+  // Refresh re-runs every effect before the replacement canvas exists. Calls on it must not
+  // reach freed WebAssembly memory, so drawing is ignored, activation reports nothing
+  // active, and work that has to produce a result fails.
+  const live = () => !disposed
+  const required = () => {
+    if (disposed) throw new Error('The WebGPU canvas was disposed.')
+  }
 
   return {
-    resize: (width, height, dpr, background) =>
-      canvas.resize(width, height, dpr, new Uint8Array([...background, 255])),
-    setView: (zoom, translation) => canvas.setView(zoom, translation[0], translation[1]),
+    resize: (width, height, dpr, background) => {
+      if (live()) canvas.resize(width, height, dpr, new Uint8Array([...background, 255]))
+    },
+    setView: (zoom, translation) => {
+      if (live()) canvas.setView(zoom, translation[0], translation[1])
+    },
     stageManifest: (manifest) => {
+      required()
       const staged = canvas.stageManifest(manifest)
       stagedManifest = { token: staged.token, bytes: manifest.slice() }
       return staged
     },
-    installResource: (resource, packet) => canvas.installResource(resource, packet),
+    installResource: async (resource, packet) => {
+      required()
+      await canvas.installResource(resource, packet)
+    },
     hasActiveManifest: (manifest) =>
       activeManifest !== null && equalBytes(activeManifest, manifest),
     activateFrame: (token) => {
-      const activated = canvas.activateFrame(token)
+      const activated = live() && canvas.activateFrame(token)
       if (activated && stagedManifest?.token === token) {
         activeManifest = stagedManifest.bytes
         stagedManifest = null
@@ -121,12 +136,12 @@ export async function createCanvas(
       return activated
     },
     activatePage: (page, expectedRevision) => {
-      const activated = canvas.activatePage(page, BigInt(expectedRevision))
+      const activated = live() && canvas.activatePage(page, BigInt(expectedRevision))
       if (activated) activeManifest = cachedManifests.get(page) ?? null
       return activated
     },
     cacheFrame: (token, page) => {
-      const cached = canvas.cacheFrame(token)
+      const cached = live() && canvas.cacheFrame(token)
       if (stagedManifest?.token === token) {
         if (cached) cachedManifests.set(page, stagedManifest.bytes)
         stagedManifest = null
@@ -134,32 +149,48 @@ export async function createCanvas(
       return cached
     },
     clear: () => {
-      canvas.clear()
+      if (live()) canvas.clear()
       stagedManifest = null
       activeManifest = null
       cachedManifests.clear()
     },
-    previewOpacity: (element, opacity) => canvas.previewOpacity(element, opacity),
+    previewOpacity: (element, opacity) => {
+      if (live()) canvas.previewOpacity(element, opacity)
+    },
     beginTransform: (elements) => {
       transformSequence = 0
-      canvas.beginTransform(canvasTransformFrames(elements))
+      if (live()) canvas.beginTransform(canvasTransformFrames(elements))
     },
-    updateTransform: (elements) =>
-      canvas.updateTransform(++transformSequence, canvasTransformFrames(elements)),
-    finishTransform: () => void canvas.finishTransform(),
-    cancelTransform: () => canvas.cancelTransform(),
-    beginStroke: (stroke) =>
+    updateTransform: (elements) => {
+      if (live()) canvas.updateTransform(++transformSequence, canvasTransformFrames(elements))
+    },
+    finishTransform: () => {
+      if (live()) canvas.finishTransform()
+    },
+    cancelTransform: () => {
+      if (live()) canvas.cancelTransform()
+    },
+    beginStroke: (stroke) => {
+      if (!live()) return
       canvas.beginStroke(
         stroke.kind,
         stroke.layer,
         stroke.point,
         stroke.diameter,
         new Uint8Array(stroke.color ?? [0, 0, 0, 0]),
-      ),
-    extendStroke: (points) => canvas.extendStroke(points),
-    finishStroke: () => void canvas.finishStroke(),
-    cancelStroke: () => canvas.cancelStroke(),
+      )
+    },
+    extendStroke: (points) => {
+      if (live()) canvas.extendStroke(points)
+    },
+    finishStroke: () => {
+      if (live()) canvas.finishStroke()
+    },
+    cancelStroke: () => {
+      if (live()) canvas.cancelStroke()
+    },
     sampleColor: async (point) => {
+      required()
       const color = await canvas.sampleColor(point.x, point.y)
       if (color.length !== 4) throw new Error('The WebGPU canvas returned an invalid color.')
       return [color[0], color[1], color[2], color[3]]
