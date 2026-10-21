@@ -55,11 +55,22 @@ pub(crate) async fn initialize(handle: AppHandle<CefRuntime>) -> Result<()> {
 
 pub fn run(context: tauri::Context<CefRuntime>) -> Result<()> {
     let cef = Cef::default();
+    // A release build pins `devtools.remote_debugging.allowed` off in the profile's local
+    // state and a debug build never turns it back on, so a shared profile would refuse the
+    // debug port after any release run. Debug builds keep their own profile beside the
+    // runtime's default `{cache}/{identifier}/cef`.
     #[cfg(debug_assertions)]
-    let cef = cef.remote_debugging(tauri_runtime_cef::RemoteDebugging::Port {
-        port: 4000,
-        allowed_origins: Vec::new(),
-    });
+    let cef = cef
+        .root_cache_path(
+            dirs::cache_dir()
+                .unwrap_or_else(std::env::temp_dir)
+                .join(&context.config().identifier)
+                .join("cef-debug"),
+        )
+        .remote_debugging(tauri_runtime_cef::RemoteDebugging::Port {
+            port: 4000,
+            allowed_origins: Vec::new(),
+        });
     #[cfg(target_os = "linux")]
     let cef = cef
         .enable_features(["Vulkan", "VulkanFromANGLE"])
