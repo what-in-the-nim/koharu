@@ -15,6 +15,7 @@
     "pageLabel": "Página {{number}}: {{label}}",
     "processing": "Processando",
     "processingFailed": "Falha no processamento.",
+    "stageFailed": "Falha em {{stage}}.",
     "stop": "Parar",
     "title": "Atividade"
   },
@@ -241,11 +242,16 @@
     "moveUp": "Mover {{name}} para cima",
     "opacityLabel": "Opacidade de {{name}}",
     "originalArtwork": "Arte original",
+    "rerunInpainting": "Refazer inpainting",
+    "rerunOcr": "Refazer OCR",
     "show": "Mostrar {{name}}",
     "sourceLabel": "Texto de origem de {{name}}",
+    "sourceView": "Original",
     "textName": "Texto {{index}}",
+    "textView": "Texto das camadas",
     "title": "Camadas",
-    "translationLabel": "Tradução de {{name}}"
+    "translationLabel": "Tradução de {{name}}",
+    "translationView": "Tradução"
   },
   "menu": {
     "about": "Sobre",
@@ -310,6 +316,7 @@
     "rename": "Renomear",
     "renameDescription": "Escolha um novo nome para esta página.",
     "renameTitle": "Renomear página",
+    "selectPage": "Selecionar {{page}}",
     "selected": "{{count}} selecionadas"
   },
   "outputPicker": {

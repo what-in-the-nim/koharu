@@ -1,5 +1,5 @@
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     io::Cursor,
     sync::{Arc, Mutex},
 };
@@ -19,13 +19,13 @@ use koharu_ml::{
 };
 use koharu_scene::{
     AssetInput, AssetMetadata, AssetRole, At, BubbleRegion, EntityOrigin, Geometry, Origin,
-    RasterLayer, RasterLayerKind, Region, RegionSpec,
+    RasterLayer, RasterLayerKind, Region, RegionSpec, TextRegion,
 };
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use super::{StageInput, StageProcessor, finish, generation};
-use crate::{InpaintingModel, ModelCell};
+use crate::{InpaintingModel, ModelCell, scope::geometry_extents};
 
 const PRODUCER: &str = "dev.koharu.pipeline.inpainting";
 
@@ -103,7 +103,7 @@ impl StageProcessor for Processor {
     }
 
     fn skip(&self, input: &StageInput) -> Result<bool> {
-        if input.inpainting_mask.is_some() {
+        if partial(input) {
             return Ok(false);
         }
         let source = AssetRole::new("source")?;
@@ -288,8 +288,8 @@ impl Model {
             }
         };
         let page = input.page;
-        let manual = input.inpainting_mask.is_some();
-        let mut edit = if manual {
+        let user_edit = partial(&input);
+        let mut edit = if user_edit {
             input.scene.edit()
         } else {
             input.scene.edit_as(generation(PRODUCER, model_name)?)
@@ -303,7 +303,7 @@ impl Model {
         if image.dimensions() != original.dimensions() || image.dimensions() != mask.dimensions() {
             bail!("inpainted image dimensions do not match page {page}");
         }
-        let mut overlay = if manual {
+        let mut overlay = if user_edit {
             cleanup.unwrap_or_else(|| RgbaImage::new(image.width(), image.height()))
         } else {
             RgbaImage::new(image.width(), image.height())
@@ -322,7 +322,7 @@ impl Model {
         let height = overlay.height();
         DynamicImage::ImageRgba8(overlay).write_to(&mut bytes, ImageFormat::Png)?;
         let cleanup_entity = if let Some(entity) = cleanup_entity {
-            if manual {
+            if user_edit {
                 let mut layer = input
                     .scene
                     .component::<RasterLayer>(entity)?
@@ -457,7 +457,7 @@ async fn prepare(input: &StageInput) -> Result<InpaintInput> {
     {
         bail!("cleanup layer dimensions do not match page {page}");
     }
-    let source = if input.inpainting_mask.is_some() {
+    let source = if partial(input) {
         if let Some(cleanup) = cleanup.as_ref() {
             let mut composite = original.to_rgba8();
             image::imageops::overlay(&mut composite, cleanup, 0, 0);
@@ -504,6 +504,9 @@ async fn prepare(input: &StageInput) -> Result<InpaintInput> {
             }
         }
     }
+    if input.requested.is_some() {
+        retain_requested_components(input, &mut mask, &mut text_mask)?;
+    }
     let flat_fill_regions = flat_fill_regions(input, source.width(), source.height())?;
     Ok(InpaintInput {
         image: source,
@@ -514,6 +517,61 @@ async fn prepare(input: &StageInput) -> Result<InpaintInput> {
         text_mask,
         flat_fill_regions,
     })
+}
+
+/// A brush mask or an entity-scoped request repaints part of the page on top of
+/// the committed cleanup, as a user edit. A page-wide run regenerates it.
+fn partial(input: &StageInput) -> bool {
+    input.inpainting_mask.is_some() || input.requested.is_some()
+}
+
+/// Keeps the whole page-mask components that touch a requested text region. The
+/// detected mask is dilated past the region's geometry, so a bounds crop would
+/// leave a ring of text behind.
+fn retain_requested_components(
+    input: &StageInput,
+    mask: &mut GrayImage,
+    text_mask: &mut GrayImage,
+) -> Result<()> {
+    let mut targets = Vec::new();
+    for entity in input.scene.descendants(input.page)? {
+        let id = entity.id();
+        if !input.requested(id)
+            || !input
+                .scene
+                .component::<Region>(id)?
+                .is_some_and(|region| region.kind == TextRegion::kind())
+        {
+            continue;
+        }
+        if let Some(extents) = input
+            .scene
+            .component::<Geometry>(id)?
+            .as_ref()
+            .and_then(geometry_extents)
+        {
+            targets.push(extents);
+        }
+    }
+    let labels = connected_components(&*mask, Connectivity::Eight, Luma([0]));
+    let mut kept = BTreeSet::new();
+    for (x, y, label) in labels.enumerate_pixels() {
+        let (x, y) = (f64::from(x), f64::from(y));
+        if label[0] != 0
+            && targets.iter().any(|(min_x, min_y, max_x, max_y)| {
+                x + 1.0 > *min_x && y + 1.0 > *min_y && x < *max_x && y < *max_y
+            })
+        {
+            kept.insert(label[0]);
+        }
+    }
+    for (x, y, label) in labels.enumerate_pixels() {
+        if !kept.contains(&label[0]) {
+            mask.put_pixel(x, y, Luma([0]));
+            text_mask.put_pixel(x, y, Luma([0]));
+        }
+    }
+    Ok(())
 }
 
 const TILE_SIZE: u32 = 512;
@@ -940,6 +998,7 @@ mod tests {
             page,
             None,
             None,
+            None,
             Arc::new(crate::ImageCache::default()),
             Some(crate::InpaintingMask {
                 page,
@@ -951,6 +1010,79 @@ mod tests {
         assert_eq!(prepared.mask.get_pixel(3, 4), &Luma([255]));
         assert_eq!(prepared.mask.get_pixel(0, 0), &Luma([0]));
         assert!(prepared.text_mask.pixels().all(|pixel| pixel[0] == 0));
+    }
+
+    #[tokio::test]
+    async fn requested_text_keeps_only_its_mask_components() {
+        let mut session = koharu_scene::Session::memory().await.unwrap();
+        let mut ids = None;
+        let mut text_mask = GrayImage::new(16, 16);
+        for (x, y) in [(2, 2), (3, 3), (11, 11), (12, 12)] {
+            text_mask.put_pixel(x, y, Luma([255]));
+        }
+        text_mask.put_pixel(2, 3, Luma([255]));
+        let encode = |image: &DynamicImage| {
+            let mut bytes = Cursor::new(Vec::new());
+            image.write_to(&mut bytes, ImageFormat::Png).unwrap();
+            Arc::<[u8]>::from(bytes.into_inner())
+        };
+        let patch = session
+            .snapshot()
+            .patch(|edit| {
+                let id = edit.add_page(
+                    koharu_scene::PageDraft::new("page", 16.0, 16.0),
+                    koharu_scene::At::End,
+                )?;
+                for (role, image) in [
+                    ("source", DynamicImage::new_rgb8(16, 16)),
+                    ("text-mask", DynamicImage::ImageLuma8(text_mask.clone())),
+                ] {
+                    edit.set_asset(
+                        id,
+                        &AssetRole::new(role)?,
+                        AssetInput::new(
+                            encode(&image),
+                            "image/png",
+                            AssetMetadata {
+                                width: Some(16),
+                                height: Some(16),
+                                attributes: BTreeMap::new(),
+                            },
+                        ),
+                    )?;
+                }
+                // The mask runs past the region, as the detector's dilation does.
+                let region = edit.add_analysis_region::<TextRegion>(
+                    id,
+                    At::End,
+                    &Geometry::rectangle(2.0, 2.0, 1.0, 1.0),
+                    None,
+                )?;
+                ids = Some((id, region));
+                Ok(())
+            })
+            .unwrap();
+        let snapshot = session.commit(patch).await.unwrap().snapshot;
+        let (page, region) = ids.unwrap();
+        let input = StageInput::new(
+            snapshot,
+            page,
+            None,
+            Some(Arc::new(BTreeSet::from([region]))),
+            None,
+            Arc::new(crate::ImageCache::default()),
+            None,
+        );
+
+        let prepared = prepare(&input).await.unwrap();
+        for (x, y) in [(2, 2), (2, 3), (3, 3)] {
+            assert_eq!(prepared.mask.get_pixel(x, y), &Luma([255]));
+            assert_eq!(prepared.text_mask.get_pixel(x, y), &Luma([255]));
+        }
+        for (x, y) in [(11, 11), (12, 12)] {
+            assert_eq!(prepared.mask.get_pixel(x, y), &Luma([0]));
+            assert_eq!(prepared.text_mask.get_pixel(x, y), &Luma([0]));
+        }
     }
 
     #[tokio::test]
@@ -997,12 +1129,14 @@ mod tests {
             page,
             None,
             None,
+            None,
             Arc::new(crate::ImageCache::default()),
             None,
         );
         let manual = StageInput::new(
-            snapshot,
+            snapshot.clone(),
             page,
+            None,
             None,
             None,
             Arc::new(crate::ImageCache::default()),
@@ -1011,10 +1145,20 @@ mod tests {
                 png: Arc::<[u8]>::from([]),
             }),
         );
+        let requested = StageInput::new(
+            snapshot,
+            page,
+            None,
+            Some(Arc::new(BTreeSet::new())),
+            None,
+            Arc::new(crate::ImageCache::default()),
+            None,
+        );
         let processor = Processor::new(InpaintingModel::LaMa {}, koharu_ml::Device::cpu()).unwrap();
 
         assert!(processor.skip(&automatic).unwrap());
         assert!(!processor.skip(&manual).unwrap());
+        assert!(!processor.skip(&requested).unwrap());
     }
 
     fn rectangle_region([left, top, right, bottom]: [u32; 4]) -> FlatFillRegion {

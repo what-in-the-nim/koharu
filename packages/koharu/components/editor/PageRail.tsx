@@ -38,6 +38,7 @@ import {
   type ProjectInfo,
 } from '@koharu/bridge/protocol'
 import { Button } from '@koharu/ui/components/button'
+import { Checkbox } from '@koharu/ui/components/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -112,24 +113,28 @@ export function PageRail() {
     [],
   )
 
-  const select = (index: number, additive: boolean, range: boolean) => {
+  // The checked pages are the processing selection. Viewing a page leaves them
+  // alone, so a selection survives browsing and editing other pages.
+  const check = (index: number, additive: boolean, range: boolean) => {
     const page = pages[index]
     if (!page) return
-    let next: string[]
     if (range && anchor.current !== null) {
       const start = Math.min(anchor.current, index)
       const end = Math.max(anchor.current, index)
       const rangeIds = pages.slice(start, end + 1).map((item) => item.id)
-      next = additive ? [...new Set([...selected, ...rangeIds])] : rangeIds
-    } else if (additive) {
-      next = selected.includes(page.id)
-        ? selected.filter((id) => id !== page.id)
-        : [...selected, page.id]
-      anchor.current = index
-    } else {
-      next = [page.id]
-      anchor.current = index
+      selectPages(additive ? [...selected, ...rangeIds] : rangeIds)
+      return
     }
+    anchor.current = index
+    selectPages(
+      selected.includes(page.id) ? selected.filter((id) => id !== page.id) : [...selected, page.id],
+    )
+  }
+
+  const show = (index: number) => {
+    const page = pages[index]
+    if (!page) return
+    anchor.current = index
     const previousProject = queryClient.getQueryData<ProjectInfo | null>(projectKey)
     const previousPage = queryClient.getQueryData<Page | null>(pageKey)
     const prepared = queryClient.getQueryData<CanvasPagePreparation>(preparedPageKey(page.id))
@@ -141,7 +146,6 @@ export function PageRail() {
         queryClient.setQueryData(projectKey, { ...previousProject, active_page: page.id })
         queryClient.setQueryData(pageKey, prepared.page)
       }
-      selectPages(next)
       selectLayers([])
       void call(commands.selectPage, page.id)
         .then((selection) => {
@@ -169,7 +173,7 @@ export function PageRail() {
     const index = pages.findIndex((page) => page.id === active)
     const next = index + step
     if (index < 0 || !pages[next]) return
-    select(next, false, false)
+    show(next)
     const visibleIndex = visiblePages.findIndex(({ index }) => index === next)
     if (visibleIndex >= 0) pageVirtualizer.scrollToIndex(visibleIndex)
   })
@@ -273,9 +277,7 @@ export function PageRail() {
               {pages.length}
             </span>
           </div>
-          {/* One selected page behaves exactly like acting on the active
-              page, so saying so would be noise. */}
-          {selected.length > 1 && (
+          {selected.length > 0 && (
             <span
               role='status'
               aria-live='polite'
@@ -339,7 +341,8 @@ export function PageRail() {
                       selected={selected.includes(page.id)}
                       dragged={dragged === page.id}
                       onIntent={active === page.id ? undefined : () => prefetchOnIntent(page.id)}
-                      onSelect={(additive, range) => select(index, additive, range)}
+                      onShow={() => show(index)}
+                      onCheck={(additive, range) => check(index, additive, range)}
                       onDragStart={() => setDragged(page.id)}
                       onDragEnd={() => setDragged(null)}
                       onRename={() => openRename(page)}
@@ -482,7 +485,8 @@ function PageItem({
   selected,
   dragged,
   onIntent,
-  onSelect,
+  onShow,
+  onCheck,
   onDragStart,
   onDragEnd,
   onRename,
@@ -494,7 +498,8 @@ function PageItem({
   selected: boolean
   dragged: boolean
   onIntent?: () => void
-  onSelect: (additive: boolean, range: boolean) => void
+  onShow: () => void
+  onCheck: (additive: boolean, range: boolean) => void
   onDragStart: () => void
   onDragEnd: () => void
   onRename: () => void
@@ -520,8 +525,15 @@ function PageItem({
       onPointerEnter={onIntent}
       onFocus={onIntent}
       onClick={(event) => {
-        if ((event.target as HTMLElement).closest('button,[role="menuitem"]')) return
-        onSelect(event.ctrlKey || event.metaKey, event.shiftKey)
+        if ((event.target as HTMLElement).closest('button,[role="menuitem"],[role="checkbox"]'))
+          return
+        // Modified clicks edit the selection the way they do in a file browser;
+        // a plain click only shows the page.
+        if (event.ctrlKey || event.metaKey || event.shiftKey) {
+          onCheck(event.ctrlKey || event.metaKey, event.shiftKey)
+        } else {
+          onShow()
+        }
       }}
       onDoubleClick={onRename}
       onDragStart={onDragStart}
@@ -541,6 +553,14 @@ function PageItem({
       </div>
       <div className='min-w-0 py-0.5'>
         <div className='flex items-start gap-1'>
+          <Checkbox
+            checked={selected}
+            aria-label={t('navigator.selectPage', { page: page.label })}
+            className='mt-px size-3.5 rounded-[3px] after:-inset-1 [&_svg]:size-2.5'
+            onCheckedChange={(_, details) =>
+              onCheck(true, Boolean((details.event as { shiftKey?: boolean }).shiftKey))
+            }
+          />
           <span className='min-w-0 flex-1 truncate text-[10px] font-medium'>{page.label}</span>
           <DropdownMenu>
             <DropdownMenuTrigger

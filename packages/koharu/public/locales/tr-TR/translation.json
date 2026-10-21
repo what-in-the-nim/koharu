@@ -15,6 +15,7 @@
     "pageLabel": "Sayfa {{number}}: {{label}}",
     "processing": "İşleniyor",
     "processingFailed": "İşleme başarısız oldu.",
+    "stageFailed": "{{stage}} başarısız oldu.",
     "stop": "Durdur",
     "title": "Etkinlik"
   },
@@ -241,11 +242,16 @@
     "moveUp": "{{name}} öğesini yukarı taşı",
     "opacityLabel": "{{name}} opaklığı",
     "originalArtwork": "Orijinal çizim",
+    "rerunInpainting": "İç boyamayı yinele",
+    "rerunOcr": "OCR’yi yinele",
     "show": "{{name}} öğesini göster",
     "sourceLabel": "{{name}} kaynak metni",
+    "sourceView": "Kaynak",
     "textName": "Metin {{index}}",
+    "textView": "Katman metni",
     "title": "Katmanlar",
-    "translationLabel": "{{name}} çevirisi"
+    "translationLabel": "{{name}} çevirisi",
+    "translationView": "Çeviri"
   },
   "menu": {
     "about": "Hakkında",
@@ -310,6 +316,7 @@
     "rename": "Yeniden adlandır",
     "renameDescription": "Bu sayfa için yeni bir ad seçin.",
     "renameTitle": "Sayfayı yeniden adlandır",
+    "selectPage": "{{page}} sayfasını seç",
     "selected": "{{count}} seçili"
   },
   "outputPicker": {

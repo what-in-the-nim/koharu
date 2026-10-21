@@ -199,11 +199,11 @@ pub(crate) async fn process(
             handle: task_handle.clone(),
         };
         let result = pipeline.execute(snapshot, request, &mut committer).await;
-        let (stopped, error) = match result {
+        let (stopped, failure) = match result {
             Ok(report) => (report.status == RunStatus::Stopped, None),
             Err(error) => {
-                tracing::error!(stage = ?error.stage, %error, "processing failed");
-                (false, Some(format!("{error:#}")))
+                tracing::error!(stage = ?error.stage, "{error:#}");
+                (false, Some(error))
             }
         };
         task_handle.state::<Processing>().stops.lock().remove(&id);
@@ -215,12 +215,19 @@ pub(crate) async fn process(
             .map(|mut job| {
                 job.state = if stopped {
                     JobState::Stopped
-                } else if error.is_some() {
+                } else if failure.is_some() {
                     JobState::Failed
                 } else {
                     JobState::Finished
                 };
-                job.error = error;
+                // Stages run concurrently, so the last progress event may name
+                // another stage. A failure reports where it happened itself.
+                if let Some(failure) = &failure {
+                    job.stage = failure.stage;
+                    job.page = failure.page;
+                    job.model = failure.model.clone();
+                    job.error = Some(failure.reason());
+                }
                 job
             });
         if let Some(job) = job {

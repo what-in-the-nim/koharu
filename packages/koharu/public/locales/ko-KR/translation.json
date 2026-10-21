@@ -15,6 +15,7 @@
     "pageLabel": "{{number}}페이지: {{label}}",
     "processing": "처리 중",
     "processingFailed": "처리에 실패했습니다.",
+    "stageFailed": "{{stage}}에 실패했습니다.",
     "stop": "중지",
     "title": "활동"
   },
@@ -241,11 +242,16 @@
     "moveUp": "{{name}} 위로 이동",
     "opacityLabel": "{{name}} 불투명도",
     "originalArtwork": "원본 아트워크",
+    "rerunInpainting": "인페인팅 다시 실행",
+    "rerunOcr": "OCR 다시 실행",
     "show": "{{name}} 표시",
     "sourceLabel": "{{name}} 원문",
+    "sourceView": "원문",
     "textName": "텍스트 {{index}}",
+    "textView": "레이어 텍스트",
     "title": "레이어",
-    "translationLabel": "{{name}} 번역"
+    "translationLabel": "{{name}} 번역",
+    "translationView": "번역"
   },
   "menu": {
     "about": "정보",
@@ -310,6 +316,7 @@
     "rename": "이름 바꾸기",
     "renameDescription": "이 페이지의 새 이름을 정하세요.",
     "renameTitle": "페이지 이름 바꾸기",
+    "selectPage": "{{page}} 선택",
     "selected": "{{count}}개 선택됨"
   },
   "outputPicker": {

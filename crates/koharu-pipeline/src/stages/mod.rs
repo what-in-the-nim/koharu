@@ -19,6 +19,7 @@ pub(crate) struct StageInput {
     scene: koharu_scene::Snapshot,
     page: EntityId,
     entities: Option<Arc<BTreeSet<EntityId>>>,
+    requested: Option<Arc<BTreeSet<EntityId>>>,
     region: Option<Bounds>,
     images: Arc<ImageCache>,
     inpainting_mask: Option<InpaintingMask>,
@@ -29,6 +30,7 @@ impl StageInput {
         scene: Snapshot,
         page: EntityId,
         entities: Option<Arc<BTreeSet<EntityId>>>,
+        requested: Option<Arc<BTreeSet<EntityId>>>,
         region: Option<Bounds>,
         images: Arc<ImageCache>,
         inpainting_mask: Option<InpaintingMask>,
@@ -37,6 +39,7 @@ impl StageInput {
             scene,
             page,
             entities,
+            requested,
             region,
             images,
             inpainting_mask,
@@ -45,6 +48,14 @@ impl StageInput {
 
     pub(crate) fn page(&self) -> EntityId {
         self.page
+    }
+
+    /// Whether an entity-scoped request named this entity rather than reaching
+    /// it through the semantic closure.
+    fn requested(&self, entity: EntityId) -> bool {
+        self.requested
+            .as_ref()
+            .is_some_and(|requested| requested.contains(&entity))
     }
 
     fn contains_entity(&self, entity: EntityId) -> Result<bool> {

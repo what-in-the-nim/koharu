@@ -15,6 +15,7 @@
     "pageLabel": "第 {{number}} 页：{{label}}",
     "processing": "来勒处理",
     "processingFailed": "处理失败哉。",
+    "stageFailed": "{{stage}}失败哉。",
     "stop": "停止",
     "title": "活动"
   },
@@ -241,11 +242,16 @@
     "moveUp": "拿 {{name}} 移上去一格",
     "opacityLabel": "{{name}} 个不透明度",
     "originalArtwork": "原始图稿",
+    "rerunInpainting": "重新修补",
+    "rerunOcr": "重新 OCR",
     "show": "显示 {{name}}",
     "sourceLabel": "{{name}} 个原文",
+    "sourceView": "原文",
     "textName": "文本 {{index}}",
+    "textView": "图层文字",
     "title": "图层",
-    "translationLabel": "{{name}} 个译文"
+    "translationLabel": "{{name}} 个译文",
+    "translationView": "译文"
   },
   "menu": {
     "about": "关于",
@@ -310,6 +316,7 @@
     "rename": "改名",
     "renameDescription": "帮箇页取个新名字。",
     "renameTitle": "页面改名",
+    "selectPage": "选择 {{page}}",
     "selected": "拣中个页面：{{count}} 页"
   },
   "outputPicker": {

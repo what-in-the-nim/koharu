@@ -324,7 +324,7 @@ describe('greenfield editor', () => {
     await user.hover(await screen.findByRole('menuitem', { name: 'Import Pages' }))
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Files…' }))
 
-    expect(await screen.findByRole('status')).toHaveTextContent('Importing pages…')
+    expect((await screen.findByText('Importing pages…')).closest('[role="status"]')).not.toBeNull()
     expect(screen.getByRole('complementary', { name: 'Activity' })).toBeInTheDocument()
     expect(importPages).toHaveBeenCalledTimes(1)
 
@@ -335,7 +335,7 @@ describe('greenfield editor', () => {
     )
 
     finishImport?.()
-    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByText('Importing pages…')).not.toBeInTheDocument())
   })
 
   it.each(['png', 'psd', 'cbz'] as const)(
@@ -434,6 +434,33 @@ describe('greenfield editor', () => {
     expect(nativeOpenUrl).toHaveBeenLastCalledWith('https://github.com/koharu-rs/koharu')
   })
 
+  it('names the failed stage, page, and model beside the reason', async () => {
+    installProject()
+    act(() => {
+      useKoharuStore.setState({
+        jobs: {
+          job: {
+            id: 'job',
+            state: 'failed',
+            completed: 1,
+            total: 4,
+            page: 'page',
+            stage: 'translation',
+            model: 'openai',
+            error: 'openai API request failed with HTTP 401: invalid key',
+          },
+        },
+      })
+    })
+    render(<ActivityCenter />)
+
+    const failure = await screen.findByRole('alert')
+    expect(failure).toHaveTextContent('Translation failed.')
+    expect(failure).toHaveTextContent('Page 1: Page 1')
+    expect(failure).toHaveTextContent('openai')
+    expect(failure).toHaveTextContent('HTTP 401: invalid key')
+  })
+
   it('shows the current version and author in About', async () => {
     const user = userEvent.setup()
     render(<TitleBar />)
@@ -450,12 +477,10 @@ describe('greenfield editor', () => {
   it('shows how many pages are selected above the filter', async () => {
     installProject()
     act(() => {
-      useKoharuStore.setState({ selectedPages: ['page-1'] })
+      useKoharuStore.setState({ selectedPages: [] })
     })
     render(<PageRail />)
 
-    // One page behaves like acting on the active page, so it is not worth
-    // announcing.
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
 
     act(() => {
@@ -465,6 +490,34 @@ describe('greenfield editor', () => {
     // A status region, so the count reaches assistive technology when it
     // changes rather than only being visible.
     expect(await screen.findByRole('status')).toHaveTextContent('3 selected')
+  })
+
+  it('keeps checked pages while another page is shown', async () => {
+    installProject()
+    queryClient.setQueryData(pagesKey, [
+      ...(queryClient.getQueryData<PageSummary[]>(pagesKey) ?? []),
+      {
+        id: 'page-2',
+        label: 'Page 2',
+        size: { width: 1000, height: 1500 },
+        source_asset: null,
+        layer_count: 0,
+      },
+    ])
+    act(() => {
+      useKoharuStore.setState({ selectedPages: [] })
+    })
+    vi.spyOn(canvasRuntime, 'showCanvasPage').mockReturnValue(false)
+    const selectPage = vi.spyOn(commands, 'selectPage')
+    render(<PageRail />)
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Select Page 2' }))
+    expect(useKoharuStore.getState().selectedPages).toEqual(['page-2'])
+
+    fireEvent.click(screen.getByText('Page 1').closest('article')!)
+    expect(selectPage).toHaveBeenLastCalledWith('page')
+    expect(useKoharuStore.getState().selectedPages).toEqual(['page-2'])
+    expect(screen.getByRole('checkbox', { name: 'Select Page 2' })).toBeChecked()
   })
 
   it('loads page thumbnails into the filmstrip', async () => {

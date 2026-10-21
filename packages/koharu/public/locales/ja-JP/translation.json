@@ -15,6 +15,7 @@
     "pageLabel": "{{number}}ページ目: {{label}}",
     "processing": "処理中",
     "processingFailed": "処理に失敗しました。",
+    "stageFailed": "{{stage}}に失敗しました。",
     "stop": "停止",
     "title": "アクティビティ"
   },
@@ -241,11 +242,16 @@
     "moveUp": "{{name}}を上へ移動",
     "opacityLabel": "{{name}}の不透明度",
     "originalArtwork": "元のアートワーク",
+    "rerunInpainting": "インペイントをやり直す",
+    "rerunOcr": "OCRをやり直す",
     "show": "{{name}}を表示",
     "sourceLabel": "{{name}}の原文",
+    "sourceView": "原文",
     "textName": "テキスト {{index}}",
+    "textView": "レイヤーの表示テキスト",
     "title": "レイヤー",
-    "translationLabel": "{{name}}の翻訳"
+    "translationLabel": "{{name}}の翻訳",
+    "translationView": "翻訳"
   },
   "menu": {
     "about": "Koharuについて",
@@ -310,6 +316,7 @@
     "rename": "名前を変更",
     "renameDescription": "このページの新しい名前を入力します。",
     "renameTitle": "ページ名を変更",
+    "selectPage": "{{page}}を選択",
     "selected": "{{count}}件選択中"
   },
   "outputPicker": {

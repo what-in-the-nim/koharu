@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useEffectEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { TitleBar } from '@/components/app/TitleBar'
@@ -14,19 +14,20 @@ import { cn } from '@koharu/ui/lib/utils'
 export function KoharuApp() {
   const { t } = useTranslation()
   const project = useProject().data
-  const selectedPages = useKoharuStore((state) => state.selectedPages)
-  const selectPages = useKoharuStore((state) => state.selectPages)
-  const selectLayers = useKoharuStore((state) => state.selectLayers)
-  const projectLoaded = project !== undefined
   const settingsOpen = useKoharuStore((state) => state.settingsOpen)
-  const activePage = project?.active_page
   const editorOpen = project !== undefined && project !== null && !settingsOpen
+  const projectName = project?.name
+  const seedSelection = useEffectEvent(() => {
+    const store = useKoharuStore.getState()
+    store.selectPages(project?.active_page ? [project.active_page] : [])
+    store.selectLayers([])
+  })
 
+  // A project opens with its active page checked. After that the checked pages
+  // are the user's, and emptying them must not bring the active page back.
   useEffect(() => {
-    if (!projectLoaded || selectedPages.length > 0) return
-    selectPages(activePage ? [activePage] : [])
-    selectLayers([])
-  }, [activePage, projectLoaded, selectLayers, selectPages, selectedPages.length])
+    if (projectName !== undefined) seedSelection()
+  }, [projectName])
 
   return (
     <div
