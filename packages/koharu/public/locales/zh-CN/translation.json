@@ -57,6 +57,7 @@
     "compare": "显示原图",
     "empty": "请选择页面以开始。",
     "fit": "适应窗口",
+    "pagePosition": "第 {{index}} 页，共 {{count}} 页",
     "surface": "Koharu 画布",
     "unavailable": "WebGPU 画布不可用"
   },
@@ -501,6 +502,15 @@
     "title": "正在准备 Koharu"
   },
   "status": {
+    "hints": {
+      "color_picker": "单击为笔刷取色",
+      "draw": "拖动绘制 · [ ] 或 Alt+滚轮调整笔刷大小",
+      "eraser": "拖动擦除所选绘制或清理图层 · [ ] 调整大小",
+      "pan": "拖动平移 · 按住 Space 可在任意工具下平移",
+      "remove": "涂抹要移除的区域 · [ ] 调整大小",
+      "select": "Shift+单击添加 · 方向键微移 · Tab 跳到下一段文本 · 按住 {{compare}} 查看原图",
+      "text": "单击创建点文本 · 拖动创建文本框"
+    },
     "zoom": "缩放"
   },
   "tools": {

@@ -57,6 +57,7 @@
     "compare": "Mostrar original",
     "empty": "Selecione uma página para começar.",
     "fit": "Ajustar à janela",
+    "pagePosition": "Página {{index}} de {{count}}",
     "surface": "Tela do Koharu",
     "unavailable": "A tela WebGPU não está disponível"
   },
@@ -501,6 +502,15 @@
     "title": "Preparando o Koharu"
   },
   "status": {
+    "hints": {
+      "color_picker": "Clique para capturar uma cor para o pincel",
+      "draw": "Arraste para pintar · [ ] ou Alt+roda para ajustar o pincel",
+      "eraser": "Arraste para apagar na camada de pintura ou limpeza selecionada · [ ] para ajustar o tamanho",
+      "pan": "Arraste para mover · Segure Espaço para mover com qualquer ferramenta",
+      "remove": "Pinte sobre uma área para removê-la · [ ] para ajustar o tamanho",
+      "select": "Shift+clique para adicionar · Setas para mover · Tab para o próximo texto · Segure {{compare}} para ver o original",
+      "text": "Clique para texto de ponto · Arraste para uma caixa de texto"
+    },
     "zoom": "Zoom"
   },
   "tools": {

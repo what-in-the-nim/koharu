@@ -15,6 +15,8 @@ export function StatusBar({ onZoomChange }: StatusBarProps) {
   const page = usePage().data
   // Selects the displayed percentage so translation-only camera changes do not re-render the bar.
   const zoom = useKoharuStore((state) => Math.round(state.camera.zoom * 100))
+  const tool = useKoharuStore((state) => state.tool)
+  const compareKey = useKoharuStore((state) => state.shortcuts.compare)
 
   return (
     <footer className='flex h-7 shrink-0 items-center gap-3 border-t border-border/80 bg-[var(--surface-toolbar)] px-2.5 text-[10px] text-muted-foreground'>
@@ -30,7 +32,9 @@ export function StatusBar({ onZoomChange }: StatusBarProps) {
         />
         <span className='w-9 shrink-0 text-right text-foreground tabular-nums'>{zoom}%</span>
       </div>
-      <div className='flex-1' />
+      <span className='min-w-0 flex-1 truncate'>
+        {page && t(`status.hints.${tool}`, { compare: compareKey.toUpperCase() })}
+      </span>
       {page && (
         <span className='tabular-nums'>
           {page.size.width} × {page.size.height} px

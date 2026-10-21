@@ -57,6 +57,7 @@
     "compare": "Afficher l'original",
     "empty": "Sélectionnez une page pour commencer.",
     "fit": "Ajuster à la fenêtre",
+    "pagePosition": "Page {{index}} sur {{count}}",
     "surface": "Canevas Koharu",
     "unavailable": "Canevas WebGPU indisponible"
   },
@@ -501,6 +502,15 @@
     "title": "Préparation de Koharu"
   },
   "status": {
+    "hints": {
+      "color_picker": "Cliquez pour prélever une couleur pour le pinceau",
+      "draw": "Faites glisser pour peindre · [ ] ou Alt+molette pour la taille du pinceau",
+      "eraser": "Faites glisser pour effacer le calque de peinture ou de nettoyage sélectionné · [ ] pour la taille",
+      "pan": "Faites glisser pour vous déplacer · Maintenez Espace pour vous déplacer avec n'importe quel outil",
+      "remove": "Peignez sur une zone pour la retirer · [ ] pour la taille",
+      "select": "Maj+clic pour ajouter · Flèches pour décaler · Tab pour le texte suivant · Maintenez {{compare}} pour voir l'original",
+      "text": "Clic pour un texte ponctuel · Faites glisser pour un bloc de texte"
+    },
     "zoom": "Zoom"
   },
   "tools": {
