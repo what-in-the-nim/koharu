@@ -15,6 +15,7 @@
     "pageLabel": "หน้า {{number}}: {{label}}",
     "processing": "กำลังประมวลผล",
     "processingFailed": "ประมวลผลไม่สำเร็จ",
+    "stageFailed": "{{stage}}ไม่สำเร็จ",
     "stop": "หยุด",
     "title": "กิจกรรม"
   },
@@ -241,11 +242,16 @@
     "moveUp": "ย้าย {{name}} ขึ้น",
     "opacityLabel": "ความทึบของ {{name}}",
     "originalArtwork": "ภาพต้นฉบับ",
+    "rerunInpainting": "เติมภาพใหม่",
+    "rerunOcr": "OCR ใหม่",
     "show": "แสดง {{name}}",
     "sourceLabel": "ข้อความต้นฉบับของ {{name}}",
+    "sourceView": "ต้นฉบับ",
     "textName": "ข้อความ {{index}}",
+    "textView": "ข้อความของเลเยอร์",
     "title": "เลเยอร์",
-    "translationLabel": "คำแปลของ {{name}}"
+    "translationLabel": "คำแปลของ {{name}}",
+    "translationView": "คำแปล"
   },
   "menu": {
     "about": "เกี่ยวกับ",
@@ -310,6 +316,7 @@
     "rename": "เปลี่ยนชื่อ",
     "renameDescription": "ตั้งชื่อใหม่ให้หน้านี้",
     "renameTitle": "เปลี่ยนชื่อหน้า",
+    "selectPage": "เลือก {{page}}",
     "selected": "เลือกไว้ {{count}} หน้า"
   },
   "outputPicker": {

@@ -1,7 +1,8 @@
 'use client'
 
 import { useMutationState } from '@tanstack/react-query'
-import { CircleAlert, Download, LoaderCircle, Square, X } from 'lucide-react'
+import { ChevronDown, CircleAlert, Download, LoaderCircle, Square, X } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { call } from '@/lib/backend'
@@ -9,9 +10,15 @@ import { usePages } from '@/lib/queries'
 import { useKoharuStore } from '@/lib/store'
 import { commands, type Download as DownloadState, type Job } from '@koharu/bridge/protocol'
 import { Button } from '@koharu/ui/components/button'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@koharu/ui/components/collapsible'
 
 export function ActivityCenter() {
   const { t } = useTranslation()
+  const [open, setOpen] = useState(true)
   const jobs = useKoharuStore((state) => state.jobs)
   const downloads = useKoharuStore((state) => state.downloads)
   const activities = useMutationState({
@@ -31,44 +38,67 @@ export function ActivityCenter() {
   )
   const failedDownloads = Object.values(downloads).filter((download) => download.state === 'failed')
   const visibleDownloads = [...runningDownloads, ...failedDownloads]
-  if (activities.length === 0 && visibleJobs.length === 0 && visibleDownloads.length === 0)
-    return null
+  const count = activities.length + visibleJobs.length + visibleDownloads.length
+  if (count === 0) return null
+  const failed = failedDownloads.length > 0 || visibleJobs.some((job) => job.state === 'failed')
+  const busy =
+    count > failedDownloads.length + visibleJobs.filter((job) => job.state === 'failed').length
 
   return (
-    <aside
-      aria-label={t('activity.title')}
+    <Collapsible
+      open={open}
+      onOpenChange={setOpen}
+      render={<aside aria-label={t('activity.title')} />}
       className='absolute right-3 bottom-9 z-30 flex w-72 max-w-[calc(100%-1.5rem)] flex-col rounded-2xl border border-border/50 bg-popover shadow-md'
     >
-      <div className='border-b px-3 py-2'>
+      <CollapsibleTrigger className='group flex items-center gap-2 rounded-2xl px-3 py-2 text-left outline-none hover:bg-foreground/[0.04] focus-visible:ring-2 focus-visible:ring-ring/25 data-[panel-open]:rounded-b-none data-[panel-open]:border-b'>
         <span className='text-[10px] font-semibold tracking-[0.1em] uppercase'>
           {t('activity.title')}
         </span>
-      </div>
-      {activities.map((activity) => (
-        <div
-          key={activity.id}
-          role='status'
-          className='grid grid-cols-[1rem_minmax(0,1fr)] items-center gap-x-2.5 border-b p-3 last:border-b-0'
-        >
+        <span className='rounded-full bg-primary/[0.07] px-1.5 py-0.5 text-[10px] text-muted-foreground tabular-nums'>
+          {count}
+        </span>
+        {busy && !open ? (
           <LoaderCircle
-            className='size-3.5 animate-spin justify-self-center text-primary motion-reduce:animate-none'
+            className='size-3 animate-spin text-primary motion-reduce:animate-none'
             aria-hidden='true'
           />
-          <span className='truncate text-[12px] font-medium'>{t(activity.label)}</span>
-        </div>
-      ))}
-      {runningDownloads.length > 1 ? (
-        <DownloadGroup downloads={runningDownloads} />
-      ) : (
-        runningDownloads.map((download) => <DownloadItem key={download.id} download={download} />)
-      )}
-      {failedDownloads.map((download) => (
-        <DownloadItem key={download.id} download={download} />
-      ))}
-      {visibleJobs.map((job) => (
-        <JobItem key={job.id} job={job} />
-      ))}
-    </aside>
+        ) : null}
+        {failed && !open ? (
+          <CircleAlert className='size-3 text-destructive' aria-hidden='true' />
+        ) : null}
+        <ChevronDown
+          className='ml-auto size-3.5 text-muted-foreground transition-transform group-data-[panel-open]:rotate-180 motion-reduce:transition-none'
+          aria-hidden='true'
+        />
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        {activities.map((activity) => (
+          <div
+            key={activity.id}
+            role='status'
+            className='grid grid-cols-[1rem_minmax(0,1fr)] items-center gap-x-2.5 border-b p-3 last:border-b-0'
+          >
+            <LoaderCircle
+              className='size-3.5 animate-spin justify-self-center text-primary motion-reduce:animate-none'
+              aria-hidden='true'
+            />
+            <span className='truncate text-[12px] font-medium'>{t(activity.label)}</span>
+          </div>
+        ))}
+        {runningDownloads.length > 1 ? (
+          <DownloadGroup downloads={runningDownloads} />
+        ) : (
+          runningDownloads.map((download) => <DownloadItem key={download.id} download={download} />)
+        )}
+        {failedDownloads.map((download) => (
+          <DownloadItem key={download.id} download={download} />
+        ))}
+        {visibleJobs.map((job) => (
+          <JobItem key={job.id} job={job} />
+        ))}
+      </CollapsibleContent>
+    </Collapsible>
   )
 }
 
@@ -117,7 +147,15 @@ function JobItem({ job }: { job: Job }) {
   if (job.state === 'failed') {
     return (
       <Failure
-        message={job.error || t('activity.processingFailed')}
+        title={
+          job.stage
+            ? t('activity.stageFailed', {
+                stage: t(`phase.${job.stage}`, { defaultValue: job.stage }),
+              })
+            : t('activity.processingFailed')
+        }
+        details={[pageLabel, job.model]}
+        message={job.error}
         onDismiss={() => dismiss(job.id)}
       />
     )
@@ -170,7 +208,9 @@ function DownloadItem({ download }: { download: DownloadState }) {
   if (download.state === 'failed') {
     return (
       <Failure
-        message={download.error || t('activity.downloadFailed')}
+        title={t('activity.downloadFailed')}
+        details={[download.name]}
+        message={download.error}
         onDismiss={() => dismiss(download.id)}
       />
     )
@@ -193,12 +233,27 @@ function DownloadItem({ download }: { download: DownloadState }) {
   )
 }
 
-function Failure({ message, onDismiss }: { message: string; onDismiss: () => void }) {
+function Failure({
+  title,
+  details,
+  message,
+  onDismiss,
+}: {
+  title: string
+  details: (string | null | undefined)[]
+  message: string | null
+  onDismiss: () => void
+}) {
   const { t } = useTranslation()
   return (
-    <div className='grid grid-cols-[1rem_minmax(0,1fr)_2.25rem_1.5rem] items-start gap-x-2.5 border-b p-3 text-[11px] last:border-b-0'>
+    <div
+      role='alert'
+      className='grid grid-cols-[1rem_minmax(0,1fr)_2.25rem_1.5rem] items-start gap-x-2.5 border-b p-3 last:border-b-0'
+    >
       <CircleAlert className='mt-0.5 size-3.5 justify-self-center text-destructive' />
-      <span className='col-start-2 col-end-4 min-w-0 text-destructive'>{message}</span>
+      <span className='col-start-2 col-end-4 truncate text-[12px] font-medium text-destructive'>
+        {title}
+      </span>
       <Button
         size='icon-xs'
         variant='ghost'
@@ -208,6 +263,19 @@ function Failure({ message, onDismiss }: { message: string; onDismiss: () => voi
       >
         <X />
       </Button>
+      {details.filter(Boolean).map((detail) => (
+        <p
+          key={detail}
+          className='col-start-2 col-end-4 mt-0.5 truncate text-[10px] text-muted-foreground'
+        >
+          {detail}
+        </p>
+      ))}
+      {message ? (
+        <p className='col-start-2 col-end-5 mt-1.5 max-h-24 overflow-y-auto text-[11px] leading-4 break-words whitespace-pre-wrap select-text'>
+          {message}
+        </p>
+      ) : null}
     </div>
   )
 }

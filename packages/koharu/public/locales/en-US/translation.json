@@ -15,6 +15,7 @@
     "pageLabel": "Page {{number}}: {{label}}",
     "processing": "Processing",
     "processingFailed": "Processing failed.",
+    "stageFailed": "{{stage}} failed.",
     "stop": "Stop",
     "title": "Activity"
   },
@@ -241,11 +242,16 @@
     "moveUp": "Move {{name}} up",
     "opacityLabel": "{{name}} opacity",
     "originalArtwork": "Original artwork",
+    "rerunInpainting": "Re-inpaint",
+    "rerunOcr": "Re-OCR",
     "show": "Show {{name}}",
     "sourceLabel": "{{name}} source text",
+    "sourceView": "Source",
     "textName": "Text {{index}}",
+    "textView": "Layer text",
     "title": "Layers",
-    "translationLabel": "{{name}} translation"
+    "translationLabel": "{{name}} translation",
+    "translationView": "Translation"
   },
   "menu": {
     "about": "About",
@@ -310,6 +316,7 @@
     "rename": "Rename",
     "renameDescription": "Choose a new name for this page.",
     "renameTitle": "Rename page",
+    "selectPage": "Select {{page}}",
     "selected": "{{count}} selected"
   },
   "outputPicker": {

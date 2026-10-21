@@ -138,6 +138,7 @@ impl<'a> Execution<'a> {
                 self.scene.clone(),
                 page,
                 self.scope.entities(),
+                self.scope.requested(),
                 self.scope.region(page),
                 images,
                 self.inpainting_mask
@@ -199,7 +200,9 @@ impl<'a> Execution<'a> {
                 Ok(patch.with_label(format!("Pipeline {stage} for page {page}")))
             })
             .context("failed to rebase stage output onto the latest scene")
-            .map_err(|error| PipelineError::new(ErrorKind::InvalidOutput, Some(stage), error))?;
+            .map_err(|error| {
+                PipelineError::new(ErrorKind::InvalidOutput, Some(stage), error).on_page(page)
+            })?;
         if self.stopped() {
             return Ok(false);
         }
@@ -208,10 +211,13 @@ impl<'a> Execution<'a> {
             .committer
             .commit(StageOutput { page, stage, patch })
             .await
-            .with_context(|| format!("failed to commit {stage} output for page {page}"))
-            .map_err(|error| PipelineError::new(ErrorKind::Commit, Some(stage), error))?;
-        validate_commit(&self.scene, &next)
-            .map_err(|error| PipelineError::new(ErrorKind::Commit, Some(stage), error))?;
+            .context("failed to commit the stage output")
+            .map_err(|error| {
+                PipelineError::new(ErrorKind::Commit, Some(stage), error).on_page(page)
+            })?;
+        validate_commit(&self.scene, &next).map_err(|error| {
+            PipelineError::new(ErrorKind::Commit, Some(stage), error).on_page(page)
+        })?;
         self.scene = next;
         Ok(true)
     }

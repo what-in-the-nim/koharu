@@ -15,6 +15,7 @@
     "pageLabel": "第 {{number}} 页：{{label}}",
     "processing": "正在处理",
     "processingFailed": "处理失败。",
+    "stageFailed": "{{stage}}失败。",
     "stop": "停止",
     "title": "活动"
   },
@@ -241,11 +242,16 @@
     "moveUp": "上移 {{name}}",
     "opacityLabel": "{{name}} 不透明度",
     "originalArtwork": "原始图稿",
+    "rerunInpainting": "重新修补",
+    "rerunOcr": "重新 OCR",
     "show": "显示 {{name}}",
     "sourceLabel": "{{name}} 的原文",
+    "sourceView": "原文",
     "textName": "文本 {{index}}",
+    "textView": "图层文字",
     "title": "图层",
-    "translationLabel": "{{name}} 的译文"
+    "translationLabel": "{{name}} 的译文",
+    "translationView": "译文"
   },
   "menu": {
     "about": "关于",
@@ -310,6 +316,7 @@
     "rename": "重命名",
     "renameDescription": "为此页面选择一个新名称。",
     "renameTitle": "重命名页面",
+    "selectPage": "选择 {{page}}",
     "selected": "已选择 {{count}}"
   },
   "outputPicker": {

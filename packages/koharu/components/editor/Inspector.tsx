@@ -18,8 +18,10 @@ import {
   Minus,
   Plus,
   RotateCcw,
+  ScanText,
   Trash2,
   Type,
+  WandSparkles,
 } from 'lucide-react'
 import { type MouseEvent, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -44,6 +46,7 @@ import {
   type FontFamily,
   type FontStyle,
   type Layer,
+  type Stage,
   type TextAlignment,
   type Typography,
   type WritingMode,
@@ -72,6 +75,7 @@ import {
   SelectValue,
 } from '@koharu/ui/components/select'
 import { Slider } from '@koharu/ui/components/slider'
+import { ToggleGroup, ToggleGroupItem } from '@koharu/ui/components/toggle-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@koharu/ui/components/tooltip'
 
 const defaultFont: FontFamily = {
@@ -94,6 +98,10 @@ const defaultFont: FontFamily = {
     },
   ],
 }
+
+// Which text a text layer row names itself by. Either view falls back to the
+// other text before that one exists.
+type TextView = 'source' | 'translation'
 
 const defaultTypography: Typography = {
   preferred_font: null,
@@ -484,6 +492,7 @@ function LayersInspector() {
     selected.length === 1 ? (selected[0] ?? null) : null,
   )
   const [movingLayer, setMovingLayer] = useState<EntityId | null>(null)
+  const [textView, setTextView] = useState<TextView>('translation')
   const anchor = useRef<EntityId | null>(null)
 
   useEffect(() => {
@@ -576,6 +585,25 @@ function LayersInspector() {
         <span className='text-[10px] text-muted-foreground tabular-nums'>
           {page.layers.filter((layer) => !isGroupLayer(layer)).length}
         </span>
+        <ToggleGroup
+          aria-label={t('layers.textView')}
+          value={[textView]}
+          onValueChange={([view]) => {
+            if (view === 'source' || view === 'translation') setTextView(view)
+          }}
+          spacing={0}
+          className='ml-auto rounded-md border border-input bg-background p-px'
+        >
+          {(['source', 'translation'] as const).map((view) => (
+            <ToggleGroupItem
+              key={view}
+              value={view}
+              className='h-5 min-w-0 rounded-[4px] px-1.5 text-[10px] font-medium text-muted-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90 group-data-horizontal/toggle-group:data-[spacing=0]:first:rounded-[4px] group-data-horizontal/toggle-group:data-[spacing=0]:last:rounded-[4px]'
+            >
+              {t(view === 'source' ? 'layers.sourceView' : 'layers.translationView')}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
       </header>
 
       <ScrollArea className='min-h-0 flex-1'>
@@ -599,6 +627,7 @@ function LayersInspector() {
                 layer={layer}
                 index={index}
                 depth={depth}
+                textView={textView}
                 selected={selected.includes(layer.id)}
                 expanded={!locked && expandedLayer === layer.id}
                 locked={locked}
@@ -629,6 +658,7 @@ function LayerRow({
   layer,
   index,
   depth,
+  textView,
   selected,
   expanded,
   locked,
@@ -643,6 +673,7 @@ function LayerRow({
   layer: Layer
   index: number
   depth: number
+  textView: TextView
   selected: boolean
   expanded: boolean
   locked: boolean
@@ -655,7 +686,7 @@ function LayerRow({
   onDelete?: () => void
 }) {
   const { t } = useTranslation()
-  const name = localizedLayerName(layer, index, t)
+  const name = localizedLayerName(layer, index, textView, t)
   const detail = localizedLayerKind(layer, t)
   const Icon = layerIcon(layer)
   return (
@@ -755,7 +786,10 @@ function LayerRow({
 
 function LayerEditor({ layer, onDelete }: { layer: Layer; onDelete?: () => void }) {
   const { t } = useTranslation()
-  const name = localizedLayerName(layer, 0, t)
+  const name = localizedLayerName(layer, 0, 'translation', t)
+  const running = useKoharuStore((state) =>
+    Object.values(state.jobs).some((job) => job.state === 'running'),
+  )
   const [opacity, setOpacity] = useState(layer.visibility.opacity * 100)
 
   useEffect(() => {
@@ -775,6 +809,14 @@ function LayerEditor({ layer, onDelete }: { layer: Layer; onDelete?: () => void 
     setOpacity(next)
     previewCanvasOpacity(layer.id, next / 100)
   }
+
+  // Entity scope limits the stage to this layer's own text and region.
+  const rerun = (stage: Stage) =>
+    void call(
+      commands.process,
+      { scope: 'entities', value: [layer.id] },
+      { operation: 'only', stage },
+    ).catch(() => undefined)
 
   const resetTextFrame = () => {
     if (!isTextLayer(layer) || !layer.automatic_region || !layer.geometry) return
@@ -858,6 +900,29 @@ function LayerEditor({ layer, onDelete }: { layer: Layer; onDelete?: () => void 
               </Tooltip>
             )}
           </div>
+          {layer.automatic_region && (
+            <div className='grid min-w-0 grid-cols-2 gap-1'>
+              {(
+                [
+                  ['ocr', ScanText, t('layers.rerunOcr')],
+                  ['inpainting', WandSparkles, t('layers.rerunInpainting')],
+                ] as const
+              ).map(([stage, Icon, label]) => (
+                <Button
+                  key={stage}
+                  type='button'
+                  variant='outline'
+                  size='xs'
+                  disabled={running}
+                  className='h-6 min-w-0 gap-1 rounded-md px-1.5 text-[10px] font-normal'
+                  onClick={() => rerun(stage)}
+                >
+                  <Icon className='size-3 shrink-0' />
+                  <span className='truncate'>{label}</span>
+                </Button>
+              ))}
+            </div>
+          )}
           <InspectorField label={t('inspector.source')}>
             <CommitTextarea
               data-testid={`edit-source-${layer.id}`}
@@ -1029,10 +1094,12 @@ function layerIcon(layer: Layer): typeof Type {
   return ImageIcon
 }
 
-function localizedLayerName(layer: Layer, index: number, t: TFunction): string {
+function localizedLayerName(layer: Layer, index: number, textView: TextView, t: TFunction): string {
   if (layer.type === 'group' || layer.type === 'raster') return layer.name
   if (layer.type === 'text') {
-    const text = layer.content.translation?.text || layer.content.source?.text
+    const { source, translation } = layer.content
+    const text =
+      textView === 'source' ? source?.text || translation?.text : translation?.text || source?.text
     return text?.trim() || t('layers.textName', { index: index + 1 })
   }
   if (layer.type === 'artwork') return t('layers.originalArtwork')

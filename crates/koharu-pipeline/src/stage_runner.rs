@@ -57,7 +57,7 @@ impl StageRunner {
         }
         let skip = self.stages.skip(job.stage, &job.input).map_err(|error| {
             self.stage_error(
-                job.stage,
+                job,
                 model,
                 AttemptFailure {
                     kind: ErrorKind::Processing,
@@ -76,7 +76,7 @@ impl StageRunner {
         let failure = match first {
             Ok(outcome) => return Ok(outcome),
             Err(failure) if is_out_of_memory(&failure.error) && !job.stop.stopped() => failure,
-            Err(failure) => return Err(self.stage_error(job.stage, model, failure)),
+            Err(failure) => return Err(self.stage_error(job, model, failure)),
         };
 
         drop(permit);
@@ -87,7 +87,7 @@ impl StageRunner {
         }
         match self.load_and_process(job, model).await {
             Ok(outcome) => Ok(outcome),
-            Err(failure) => Err(self.stage_error(job.stage, model, failure)),
+            Err(failure) => Err(self.stage_error(job, model, failure)),
         }
     }
 
@@ -138,13 +138,15 @@ impl StageRunner {
             })
     }
 
-    fn stage_error(&self, stage: Stage, model: &str, failure: AttemptFailure) -> PipelineError {
-        self.stages.unload(stage);
-        let message = match failure.kind {
-            ErrorKind::ModelLoad => format!("failed to load {model}"),
-            _ => format!("{model} failed"),
+    fn stage_error(&self, job: &StageJob, model: &str, failure: AttemptFailure) -> PipelineError {
+        self.stages.unload(job.stage);
+        let error = match failure.kind {
+            ErrorKind::ModelLoad => failure.error.context("failed to load the model"),
+            _ => failure.error,
         };
-        PipelineError::new(failure.kind, Some(stage), failure.error.context(message))
+        PipelineError::new(failure.kind, Some(job.stage), error)
+            .on_page(job.input.page())
+            .with_model(model)
     }
 }
 

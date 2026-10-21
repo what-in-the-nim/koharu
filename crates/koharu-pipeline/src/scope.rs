@@ -63,23 +63,24 @@ pub enum Scope {
 pub(crate) struct NormalizedScope {
     pages: Arc<[EntityId]>,
     entities: Option<Arc<BTreeSet<EntityId>>>,
+    // The requested subtrees, the text they present, and the regions that text
+    // was recognized from. Unlike `entities`, this excludes balloon siblings the
+    // semantic closure pulls in, so stages can limit overrides to what was named.
+    requested: Option<Arc<BTreeSet<EntityId>>>,
     region: Option<(EntityId, Bounds)>,
 }
 
 impl NormalizedScope {
     pub(crate) fn new(snapshot: &Snapshot, scope: &Scope, stages: &[Stage]) -> Result<Self> {
-        if matches!(scope, Scope::Entities(_))
-            && stages
-                .iter()
-                .any(|stage| matches!(stage, Stage::Detection | Stage::Inpainting))
-        {
-            bail!("detection and inpainting do not support entity-only scope");
+        if matches!(scope, Scope::Entities(_)) && stages.contains(&Stage::Detection) {
+            bail!("detection does not support entity-only scope");
         }
 
         match scope {
             Scope::Project => Ok(Self {
                 pages: snapshot.pages().map(|page| page.id()).collect(),
                 entities: None,
+                requested: None,
                 region: None,
             }),
             Scope::Pages(requested) => {
@@ -98,6 +99,7 @@ impl NormalizedScope {
                 Ok(Self {
                     pages,
                     entities: None,
+                    requested: None,
                     region: None,
                 })
             }
@@ -107,6 +109,7 @@ impl NormalizedScope {
                 Ok(Self {
                     pages: Arc::from([*page]),
                     entities: None,
+                    requested: None,
                     region: Some((*page, *bounds)),
                 })
             }
@@ -124,6 +127,7 @@ impl NormalizedScope {
                 for entity in requested {
                     hierarchy.extend(snapshot.subtree(entity)?.map(|entity| entity.id()));
                 }
+                let requested = presented_sources(snapshot, hierarchy.clone());
                 let entities = semantic_closure(snapshot, hierarchy);
                 let pages = snapshot
                     .pages()
@@ -133,6 +137,7 @@ impl NormalizedScope {
                 Ok(Self {
                     pages,
                     entities: Some(Arc::new(entities)),
+                    requested: Some(Arc::new(requested)),
                     region: None,
                 })
             }
@@ -147,11 +152,37 @@ impl NormalizedScope {
         self.entities.clone()
     }
 
+    pub(crate) fn requested(&self) -> Option<Arc<BTreeSet<EntityId>>> {
+        self.requested.clone()
+    }
+
     pub(crate) fn region(&self, page: EntityId) -> Option<Bounds> {
         debug_assert!(self.pages.contains(&page));
         self.region
             .and_then(|(candidate, bounds)| (candidate == page).then_some(bounds))
     }
+}
+
+fn presented_sources(snapshot: &Snapshot, mut entities: BTreeSet<EntityId>) -> BTreeSet<EntityId> {
+    let named = entities.iter().copied().collect::<Vec<_>>();
+    for entity in named {
+        let contents = std::iter::once(entity)
+            .chain(
+                snapshot
+                    .relations_from_as::<Presents>(entity)
+                    .map(|presents| presents.value().target),
+            )
+            .collect::<Vec<_>>();
+        for content in contents {
+            entities.insert(content);
+            entities.extend(
+                snapshot
+                    .relations_from_as::<RecognizedFrom>(content)
+                    .map(|recognized| recognized.value().target),
+            );
+        }
+    }
+    entities
 }
 
 fn semantic_closure(snapshot: &Snapshot, mut entities: BTreeSet<EntityId>) -> BTreeSet<EntityId> {

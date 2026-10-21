@@ -124,9 +124,12 @@ impl Model {
             for relation in input.scene.relations_to_as::<RecognizedFrom>(region) {
                 let content = relation.value().source;
                 let previous = input.scene.component::<SourceText>(content)?;
+                // Hand-edited source survives a broad run. Naming the text in an
+                // entity-scoped request is an explicit ask to recognize it again.
                 if previous
                     .as_ref()
                     .is_some_and(|value| matches!(value.text.origin, Origin::User))
+                    && !input.requested(content)
                 {
                     continue;
                 }
