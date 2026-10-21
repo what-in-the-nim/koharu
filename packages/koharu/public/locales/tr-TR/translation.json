@@ -54,9 +54,11 @@
     "working": "Çalışıyor…"
   },
   "canvas": {
+    "compare": "Orijinali Göster",
     "empty": "Başlamak için bir sayfa seçin.",
     "eraserNeedsLayer": "Silgiyi kullanmadan önce bir boyama veya temizleme katmanı seçin.",
     "fit": "Pencereye Sığdır",
+    "pagePosition": "Sayfa {{index}} / {{count}}",
     "surface": "Koharu tuvali",
     "unavailable": "WebGPU tuvali kullanılamıyor"
   },
@@ -501,6 +503,15 @@
     "title": "Koharu hazırlanıyor"
   },
   "status": {
+    "hints": {
+      "color_picker": "Fırça için renk almak üzere tıklayın",
+      "draw": "Boyamak için sürükleyin · Fırça boyutu için [ ] veya Alt+tekerlek",
+      "eraser": "Seçili boyama veya temizleme katmanını silmek için sürükleyin · Boyut için [ ]",
+      "pan": "Kaydırmak için sürükleyin · Her araçta kaydırmak için Boşluk tuşunu basılı tutun",
+      "remove": "Kaldırmak istediğiniz alanı boyayın · Boyut için [ ]",
+      "select": "Eklemek için Shift+tıklama · Kaydırmak için oklar · Sonraki metin için Tab · Orijinali görmek için {{compare}} tuşunu basılı tutun",
+      "text": "Nokta metni için tıklayın · Metin kutusu için sürükleyin"
+    },
     "zoom": "Yakınlaştırma"
   },
   "tools": {

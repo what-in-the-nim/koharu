@@ -35,7 +35,7 @@ export interface CanvasBrush {
   diameter: number
   color: string
 }
-export type ShortcutAction = CanvasTool | 'fit'
+export type ShortcutAction = CanvasTool | 'fit' | 'compare'
 export type CanvasViewAction = 'fit' | 'zoom-in' | 'zoom-out' | 'actual-size'
 export type Shortcuts = Record<ShortcutAction, string>
 export type PipelineScope = 'page' | 'selected-pages' | 'project'
@@ -88,6 +88,7 @@ export const defaultShortcuts: Shortcuts = {
   remove: 'j',
   pan: 'h',
   fit: '0',
+  compare: '\\',
 }
 
 export const useKoharuStore = create<KoharuStore>()((set) => ({

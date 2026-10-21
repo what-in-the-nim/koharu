@@ -54,9 +54,11 @@
     "working": "来勒处理任务…"
   },
   "canvas": {
+    "compare": "显示原图",
     "empty": "先选一页，就好开始。",
     "eraserNeedsLayer": "用橡皮擦前头，先选一只绘制或者清理图层。",
     "fit": "适应窗口",
+    "pagePosition": "第 {{index}} 页，一共 {{count}} 页",
     "surface": "Koharu 画布",
     "unavailable": "WebGPU 画布用弗来"
   },
@@ -501,6 +503,15 @@
     "title": "来勒准备 Koharu"
   },
   "status": {
+    "hints": {
+      "color_picker": "点一记吸颜色拨笔刷",
+      "draw": "拖一拖画 · [ ] 或者 Alt+滚轮调笔刷大小",
+      "eraser": "拖一拖擦脱选中个绘制或者清理图层 · [ ] 调大小",
+      "pan": "拖一拖移动 · 揿牢 Space 随便啥工具侪好移",
+      "remove": "要移脱个地方涂一涂 · [ ] 调大小",
+      "select": "Shift+点一记加进去 · 方向键挪一挪 · Tab 到下一段文本 · 揿牢 {{compare}} 看原图",
+      "text": "点一记是点文本 · 拖一拖是文本框"
+    },
     "zoom": "缩放"
   },
   "tools": {

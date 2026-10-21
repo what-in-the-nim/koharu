@@ -10,7 +10,12 @@ import { StatusBar } from '@/components/editor/StatusBar'
 import { ToolBar } from '@/components/editor/ToolBar'
 import { useCanvas } from '@/components/editor/useCanvas'
 import { call } from '@/lib/backend'
-import { expandLayerSelection } from '@/lib/document'
+import {
+  displayedLayers,
+  effectiveLayerVisibility,
+  expandLayerSelection,
+  isTextLayer,
+} from '@/lib/document'
 import {
   controlFrame,
   draftFrame,
@@ -99,6 +104,7 @@ export function CanvasWorkspace() {
   const previousPageIndex = useRef<number | null>(null)
   const spaceHeld = useRef(false)
   const nudge = useRef<{ originals: TransformFrame[]; offset: Point } | null>(null)
+  const comparing = useRef<string[] | null>(null)
   const transformActive = useRef(false)
   const transformRevision = useRef<number | null>(null)
   const transformFinal = useRef<TransformFrame[]>([])
@@ -215,10 +221,24 @@ export function CanvasWorkspace() {
       })
   }, [canvas, enqueue, transformUpdates])
 
+  // Holding the compare key shows the original page through the canvas's transient opacity
+  // preview; nothing is committed. A new frame clears every preview, so restoring a layer
+  // that is no longer in the frame is expected to fail.
+  const endCompare = useCallback(() => {
+    const hidden = comparing.current
+    comparing.current = null
+    for (const id of hidden ?? []) {
+      try {
+        canvas?.previewOpacity(id, null)
+      } catch {}
+    }
+  }, [canvas])
+
   const cancelGesture = useCallback(() => {
     const current = gesture.current
     gesture.current = null
     nudge.current = null
+    endCompare()
     if (current?.kind === 'paint' || current?.kind === 'erase' || current?.kind === 'inpaint') {
       strokeUpdates.clear()
       canvas?.cancelStroke()
@@ -231,7 +251,7 @@ export function CanvasWorkspace() {
     }
     setDraft(null)
     setPreviews({})
-  }, [canvas, strokeUpdates, transformUpdates])
+  }, [canvas, endCompare, strokeUpdates, transformUpdates])
 
   const fitCanvas = useCallback(() => {
     const element = surface.current
@@ -391,6 +411,51 @@ export function CanvasWorkspace() {
     return true
   })
 
+  // Tab steps through visible text layers in the layer panel's order and centres each one at
+  // the current zoom, so every bubble can be proofread without the mouse.
+  const stepTextLayer = useEffectEvent((event: KeyboardEvent): boolean => {
+    if (event.key !== 'Tab' || event.ctrlKey || event.metaKey || event.altKey) return false
+    if (!page || tool !== 'select') return false
+    if (event.target !== surface.current && event.target !== document.body) return false
+    const texts = displayedLayers(page.layers, page.id).flatMap(({ layer }) => {
+      if (!isTextLayer(layer) || !effectiveLayerVisibility(page.layers, layer).visible) return []
+      const frame = controlFrame(layer, layerFrames)
+      return frame ? [{ layer, frame }] : []
+    })
+    if (!texts.length) return false
+    event.preventDefault()
+    const current =
+      selected.length === 1 ? texts.findIndex(({ layer }) => layer.id === selected[0]) : -1
+    const step = event.shiftKey ? -1 : 1
+    const next =
+      current < 0
+        ? step > 0
+          ? 0
+          : texts.length - 1
+        : (current + step + texts.length) % texts.length
+    const { layer, frame } = texts[next]!
+    selectLayers([layer.id])
+    const element = surface.current
+    if (!element) return true
+    const bounds = element.getBoundingClientRect()
+    const dpr = window.devicePixelRatio
+    const { zoom } = useKoharuStore.getState().camera
+    const translation = clampCameraTranslation(
+      [
+        bounds.width * dpr * 0.5 - (frame.x + frame.width * 0.5) * zoom,
+        bounds.height * dpr * 0.5 - (frame.y + frame.height * 0.5) * zoom,
+      ],
+      zoom,
+      pageWidth ?? page.size.width,
+      pageHeight ?? page.size.height,
+      bounds.width * dpr,
+      bounds.height * dpr,
+      dpr,
+    )
+    useKoharuStore.setState({ camera: { zoom, translation, fitted: false } })
+    return true
+  })
+
   const finishNudge = useEffectEvent((event: KeyboardEvent) => {
     if (!nudge.current || !NUDGE_DIRECTIONS[event.key]) return
     nudge.current = null
@@ -452,6 +517,21 @@ export function CanvasWorkspace() {
         requestCanvasView('fit')
         return
       }
+      if (event.key.toLowerCase() === state.shortcuts.compare) {
+        if (!comparing.current && page && canvas) {
+          comparing.current = page.layers
+            .filter((layer) => layer.type !== 'artwork' && layer.type !== 'group')
+            .flatMap((layer) => {
+              try {
+                canvas.previewOpacity(layer.id, 0)
+                return [layer.id]
+              } catch {
+                return []
+              }
+            })
+        }
+        return
+      }
       if (event.key === 'Escape') {
         cancelGesture()
         colorSampling?.cancel()
@@ -471,6 +551,7 @@ export function CanvasWorkspace() {
         return
       }
       if (nudgeSelection(event)) return
+      if (stepTextLayer(event)) return
       const next = (
         ['select', 'text', 'draw', 'eraser', 'color_picker', 'remove', 'pan'] as const
       ).find((action) => state.shortcuts[action] === event.key.toLowerCase())
@@ -480,6 +561,7 @@ export function CanvasWorkspace() {
     const up = (event: KeyboardEvent) => {
       if (event.key === 'Alt') event.preventDefault()
       if (event.code === 'Space') spaceHeld.current = false
+      if (event.key.toLowerCase() === useKoharuStore.getState().shortcuts.compare) endCompare()
       finishNudge(event)
     }
     const blur = () => {
@@ -495,7 +577,16 @@ export function CanvasWorkspace() {
       window.removeEventListener('keyup', up)
       window.removeEventListener('blur', blur)
     }
-  }, [cancelGesture, colorSampling, page, requestCanvasView, selectLayers, setTool])
+  }, [
+    cancelGesture,
+    canvas,
+    colorSampling,
+    endCompare,
+    page,
+    requestCanvasView,
+    selectLayers,
+    setTool,
+  ])
 
   const clientPagePoint = (clientX: number, clientY: number) =>
     pagePoint(

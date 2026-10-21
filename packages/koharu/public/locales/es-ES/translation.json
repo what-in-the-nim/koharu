@@ -54,9 +54,11 @@
     "working": "Trabajando…"
   },
   "canvas": {
+    "compare": "Mostrar original",
     "empty": "Selecciona una página para empezar.",
     "eraserNeedsLayer": "Selecciona una capa de pintura o de limpieza antes de usar el Borrador.",
     "fit": "Ajustar a la ventana",
+    "pagePosition": "Página {{index}} de {{count}}",
     "surface": "Lienzo de Koharu",
     "unavailable": "El lienzo WebGPU no está disponible"
   },
@@ -501,6 +503,15 @@
     "title": "Preparando Koharu"
   },
   "status": {
+    "hints": {
+      "color_picker": "Haz clic para tomar un color para el pincel",
+      "draw": "Arrastra para pintar · [ ] o Alt+rueda para cambiar el tamaño del pincel",
+      "eraser": "Arrastra para borrar en la capa de pintura o limpieza seleccionada · [ ] para cambiar el tamaño",
+      "pan": "Arrastra para desplazar · Mantén Espacio para desplazar con cualquier herramienta",
+      "remove": "Pinta sobre una zona para eliminarla · [ ] para cambiar el tamaño",
+      "select": "Mayús+clic para añadir · Flechas para mover · Tab para el siguiente texto · Mantén {{compare}} para ver el original",
+      "text": "Clic para texto de punto · Arrastra para un cuadro de texto"
+    },
     "zoom": "Zoom"
   },
   "tools": {

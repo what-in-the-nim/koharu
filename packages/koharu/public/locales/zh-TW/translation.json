@@ -54,9 +54,11 @@
     "working": "正在工作…"
   },
   "canvas": {
+    "compare": "顯示原圖",
     "empty": "請選擇頁面以開始。",
     "eraserNeedsLayer": "使用橡皮擦前，請先選擇繪製或清理圖層。",
     "fit": "適應視窗",
+    "pagePosition": "第 {{index}} 頁，共 {{count}} 頁",
     "surface": "Koharu 畫布",
     "unavailable": "WebGPU 畫布無法使用"
   },
@@ -501,6 +503,15 @@
     "title": "正在準備 Koharu"
   },
   "status": {
+    "hints": {
+      "color_picker": "按一下為筆刷取色",
+      "draw": "拖曳繪製 · [ ] 或 Alt+滾輪調整筆刷大小",
+      "eraser": "拖曳擦除所選繪製或清理圖層 · [ ] 調整大小",
+      "pan": "拖曳平移 · 按住 Space 可在任何工具下平移",
+      "remove": "塗抹要移除的區域 · [ ] 調整大小",
+      "select": "Shift+按一下以加入 · 方向鍵微移 · Tab 跳到下一段文字 · 按住 {{compare}} 查看原圖",
+      "text": "按一下建立點文字 · 拖曳建立文字框"
+    },
     "zoom": "縮放"
   },
   "tools": {

@@ -54,9 +54,11 @@
     "working": "Working..."
   },
   "canvas": {
+    "compare": "Show Original",
     "empty": "Select a page to begin.",
     "eraserNeedsLayer": "Select a paint or cleanup layer before using the Eraser.",
     "fit": "Fit Window",
+    "pagePosition": "Page {{index}} of {{count}}",
     "surface": "Koharu canvas",
     "unavailable": "WebGPU canvas unavailable"
   },
@@ -501,6 +503,15 @@
     "title": "Preparing Koharu"
   },
   "status": {
+    "hints": {
+      "color_picker": "Click to pick a color for the brush",
+      "draw": "Drag to paint · [ ] or Alt+wheel to resize the brush",
+      "eraser": "Drag to erase the selected paint or cleanup layer · [ ] to resize",
+      "pan": "Drag to pan · Hold Space to pan from any tool",
+      "remove": "Paint over an area to remove it · [ ] to resize",
+      "select": "Shift+click to add · Arrows to nudge · Tab for the next text · Hold {{compare}} to see the original",
+      "text": "Click for point text · Drag for a text box"
+    },
     "zoom": "Zoom"
   },
   "tools": {

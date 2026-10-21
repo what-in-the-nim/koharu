@@ -29,11 +29,11 @@ import { CommitTextarea } from '@/components/controls/CommitTextarea'
 import { FontPicker } from '@/components/controls/FontPicker'
 import { call } from '@/lib/backend'
 import {
+  displayedLayers,
   expandLayerSelection,
   isGroupLayer,
   isLockedLayer,
   isTextLayer,
-  layerChildren,
 } from '@/lib/document'
 import { pageKey, projectKey, queryClient, refresh, useFonts, usePage } from '@/lib/queries'
 import { useKoharuStore } from '@/lib/store'
@@ -473,21 +473,6 @@ function nearestFontWeight(weights: number[], target: number): number {
 
 function normalizeFontName(value: string): string {
   return value.normalize('NFKC').trim().replace(/\s+/g, ' ').toLowerCase()
-}
-
-function displayedLayers(layers: Layer[], page: EntityId) {
-  const indexes = new Map(layers.map((layer, index) => [layer.id, index]))
-  const rows: { layer: Layer; index: number; depth: number }[] = []
-  const append = (layer: Layer, depth: number) => {
-    rows.push({ layer, index: indexes.get(layer.id) ?? 0, depth })
-    if (!isGroupLayer(layer)) return
-    const children = layerChildren(layers, layer.id)
-    const ordered = layer.role === 'text' ? children : [...children].reverse()
-    for (const child of ordered) append(child, depth + 1)
-  }
-  const roots = layers.filter((layer) => (layer.parent ?? page) === page).reverse()
-  for (const layer of roots) append(layer, 0)
-  return rows
 }
 
 function LayersInspector() {
