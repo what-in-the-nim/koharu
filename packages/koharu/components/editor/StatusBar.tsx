@@ -27,7 +27,7 @@ export function StatusBar({ onZoomChange }: StatusBarProps) {
           max={800}
           step={5}
           value={Math.min(800, Math.max(10, zoom))}
-          className='w-24 shrink-0 [&_[data-slot=slider-thumb]]:size-2'
+          className='shrink-0 data-horizontal:w-24 [&_[data-slot=slider-thumb]]:size-2'
           onValueChange={(value) => onZoomChange(value / 100)}
         />
         <span className='w-9 shrink-0 text-right text-foreground tabular-nums'>{zoom}%</span>
