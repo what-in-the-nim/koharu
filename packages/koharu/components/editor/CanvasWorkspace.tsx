@@ -99,6 +99,7 @@ export function CanvasWorkspace() {
   const previousPageIndex = useRef<number | null>(null)
   const spaceHeld = useRef(false)
   const nudge = useRef<{ originals: TransformFrame[]; offset: Point } | null>(null)
+  const comparing = useRef<string[] | null>(null)
   const transformActive = useRef(false)
   const transformRevision = useRef<number | null>(null)
   const transformFinal = useRef<TransformFrame[]>([])
@@ -215,10 +216,24 @@ export function CanvasWorkspace() {
       })
   }, [canvas, enqueue, transformUpdates])
 
+  // Holding the compare key shows the original page through the canvas's transient opacity
+  // preview; nothing is committed. A new frame clears every preview, so restoring a layer
+  // that is no longer in the frame is expected to fail.
+  const endCompare = useCallback(() => {
+    const hidden = comparing.current
+    comparing.current = null
+    for (const id of hidden ?? []) {
+      try {
+        canvas?.previewOpacity(id, null)
+      } catch {}
+    }
+  }, [canvas])
+
   const cancelGesture = useCallback(() => {
     const current = gesture.current
     gesture.current = null
     nudge.current = null
+    endCompare()
     if (current?.kind === 'paint' || current?.kind === 'erase' || current?.kind === 'inpaint') {
       strokeUpdates.clear()
       canvas?.cancelStroke()
@@ -231,7 +246,7 @@ export function CanvasWorkspace() {
     }
     setDraft(null)
     setPreviews({})
-  }, [canvas, strokeUpdates, transformUpdates])
+  }, [canvas, endCompare, strokeUpdates, transformUpdates])
 
   const fitCanvas = useCallback(() => {
     const element = surface.current
@@ -452,6 +467,21 @@ export function CanvasWorkspace() {
         requestCanvasView('fit')
         return
       }
+      if (event.key.toLowerCase() === state.shortcuts.compare) {
+        if (!comparing.current && page && canvas) {
+          comparing.current = page.layers
+            .filter((layer) => layer.type !== 'artwork' && layer.type !== 'group')
+            .flatMap((layer) => {
+              try {
+                canvas.previewOpacity(layer.id, 0)
+                return [layer.id]
+              } catch {
+                return []
+              }
+            })
+        }
+        return
+      }
       if (event.key === 'Escape') {
         cancelGesture()
         colorSampling?.cancel()
@@ -480,6 +510,7 @@ export function CanvasWorkspace() {
     const up = (event: KeyboardEvent) => {
       if (event.key === 'Alt') event.preventDefault()
       if (event.code === 'Space') spaceHeld.current = false
+      if (event.key.toLowerCase() === useKoharuStore.getState().shortcuts.compare) endCompare()
       finishNudge(event)
     }
     const blur = () => {
@@ -495,7 +526,16 @@ export function CanvasWorkspace() {
       window.removeEventListener('keyup', up)
       window.removeEventListener('blur', blur)
     }
-  }, [cancelGesture, colorSampling, page, requestCanvasView, selectLayers, setTool])
+  }, [
+    cancelGesture,
+    canvas,
+    colorSampling,
+    endCompare,
+    page,
+    requestCanvasView,
+    selectLayers,
+    setTool,
+  ])
 
   const clientPagePoint = (clientX: number, clientY: number) =>
     pagePoint(
