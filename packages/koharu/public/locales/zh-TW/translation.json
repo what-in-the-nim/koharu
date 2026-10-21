@@ -55,6 +55,7 @@
   },
   "canvas": {
     "empty": "請選擇頁面以開始。",
+    "eraserNeedsLayer": "使用橡皮擦前，請先選擇繪製或清理圖層。",
     "fit": "適應視窗",
     "surface": "Koharu 畫布",
     "unavailable": "WebGPU 畫布無法使用"

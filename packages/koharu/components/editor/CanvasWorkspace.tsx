@@ -719,7 +719,7 @@ export function CanvasWorkspace() {
               }
             } else if (tool === 'eraser') {
               if (!activeRaster) {
-                receiveError('Select a paint or cleanup layer before using the Eraser.')
+                receiveError(t('canvas.eraserNeedsLayer'))
                 return
               }
               strokeUpdates.clear()

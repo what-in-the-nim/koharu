@@ -55,6 +55,7 @@
   },
   "canvas": {
     "empty": "Selecciona una página para empezar.",
+    "eraserNeedsLayer": "Selecciona una capa de pintura o de limpieza antes de usar el Borrador.",
     "fit": "Ajustar a la ventana",
     "surface": "Lienzo de Koharu",
     "unavailable": "El lienzo WebGPU no está disponible"

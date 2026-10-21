@@ -55,6 +55,7 @@
   },
   "canvas": {
     "empty": "Sélectionnez une page pour commencer.",
+    "eraserNeedsLayer": "Sélectionnez un calque de peinture ou de nettoyage avant d'utiliser la Gomme.",
     "fit": "Ajuster à la fenêtre",
     "surface": "Canevas Koharu",
     "unavailable": "Canevas WebGPU indisponible"

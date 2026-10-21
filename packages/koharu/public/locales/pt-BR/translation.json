@@ -55,6 +55,7 @@
   },
   "canvas": {
     "empty": "Selecione uma página para começar.",
+    "eraserNeedsLayer": "Selecione uma camada de pintura ou de limpeza antes de usar a Borracha.",
     "fit": "Ajustar à janela",
     "surface": "Tela do Koharu",
     "unavailable": "A tela WebGPU não está disponível"

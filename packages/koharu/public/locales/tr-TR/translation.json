@@ -55,6 +55,7 @@
   },
   "canvas": {
     "empty": "Başlamak için bir sayfa seçin.",
+    "eraserNeedsLayer": "Silgiyi kullanmadan önce bir boyama veya temizleme katmanı seçin.",
     "fit": "Pencereye Sığdır",
     "surface": "Koharu tuvali",
     "unavailable": "WebGPU tuvali kullanılamıyor"
