@@ -70,6 +70,9 @@ pub(super) async fn translate(
         reasoning_effort: generation
             .reasoning
             .map(|enabled| if enabled { "medium" } else { "none" }),
+        chat_template_kwargs: generation
+            .reasoning
+            .map(|enable_thinking| ChatTemplateKwargs { enable_thinking }),
         response_format: ResponseFormat {
             kind: "json_schema",
             json_schema: JsonSchema {
@@ -149,7 +152,17 @@ struct ChatRequest<'a> {
     presence_penalty: Option<f32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     reasoning_effort: Option<&'static str>,
+    // llama.cpp, vLLM, and SGLang ignore `reasoning_effort` for hybrid
+    // thinking models such as Qwen3; they switch thinking through the chat
+    // template instead.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    chat_template_kwargs: Option<ChatTemplateKwargs>,
     response_format: ResponseFormat,
+}
+
+#[derive(Serialize)]
+struct ChatTemplateKwargs {
+    enable_thinking: bool,
 }
 
 #[derive(Serialize)]
@@ -249,6 +262,9 @@ mod tests {
             frequency_penalty: None,
             presence_penalty: None,
             reasoning_effort: Some("none"),
+            chat_template_kwargs: Some(ChatTemplateKwargs {
+                enable_thinking: false,
+            }),
             response_format: ResponseFormat {
                 kind: "json_schema",
                 json_schema: JsonSchema {
@@ -262,6 +278,7 @@ mod tests {
 
         assert_eq!(value["max_tokens"], 1024);
         assert_eq!(value["reasoning_effort"], "none");
+        assert_eq!(value["chat_template_kwargs"]["enable_thinking"], false);
         assert_eq!(value["response_format"]["type"], "json_schema");
         assert_eq!(value["response_format"]["json_schema"]["strict"], true);
         assert_eq!(
