@@ -55,6 +55,7 @@
   },
   "canvas": {
     "empty": "ページを選択して開始します。",
+    "eraserNeedsLayer": "消しゴムを使う前に、ペイントまたはクリーンアップレイヤーを選択してください。",
     "fit": "ウィンドウに合わせる",
     "surface": "Koharu キャンバス",
     "unavailable": "WebGPU キャンバスを利用できません"

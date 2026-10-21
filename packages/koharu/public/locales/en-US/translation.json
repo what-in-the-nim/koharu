@@ -55,6 +55,7 @@
   },
   "canvas": {
     "empty": "Select a page to begin.",
+    "eraserNeedsLayer": "Select a paint or cleanup layer before using the Eraser.",
     "fit": "Fit Window",
     "surface": "Koharu canvas",
     "unavailable": "WebGPU canvas unavailable"
